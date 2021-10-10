@@ -105,6 +105,7 @@ public:
 	ofImage image; //  time in ms
 	string name;
 	bool haveImage;
+	bool started;
 	float width, height;
 	Emitter *child1;
 	Emitter *child2;

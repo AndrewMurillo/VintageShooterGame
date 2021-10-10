@@ -213,6 +213,7 @@ Helicopter::Helicopter() {
 	velocity = glm::vec3(0, 0, 0);
 	bSelected = false;
 	haveImage = false;
+	started = false;
 	width = 60;
 	height = 80;
 	child1 = new Emitter(new SpriteSystem());
@@ -254,12 +255,16 @@ void Helicopter::update() {
 
 void Helicopter::start() {
 	// Start children emitters
-	child1->start();
-	child2->start();
+	if (!started) {
+		started = true;
+		child1->start();
+		child2->start();
+	}
 }
 
 void Helicopter::stop() {
 	// Stop children emitters
+	started = false;
 	child1->stop();
 	child2->stop();
 }
@@ -306,7 +311,6 @@ void ofApp::setup(){
 	player.setPosition(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
 	player.child1->setPosition(glm::vec3(ofGetWidth() / 2.0 + 20, ofGetHeight() / 2.0, 0));
 	player.child2->setPosition(glm::vec3(ofGetWidth() / 2.0 - 20, ofGetHeight() / 2.0, 0));
-	player.start();
 	
 	//	GUI SETUP
 	//
@@ -406,12 +410,11 @@ void ofApp::keyPressed(int key){
 		ofSetFullscreen(bFullscreen);
 		break;
 	case ' ':
-	{
 		if (!isGameInit) {
 			isGameInit = true;
 		}
+		player.start();
 		break;
-	}
 	case 'p':
 		isPaused = !isPaused;
 		break;
@@ -422,7 +425,13 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+	switch (key) {
+	case ' ':
+		player.stop();
+		break;
+	default:
+		break;
+	}
 }
 
 //--------------------------------------------------------------
