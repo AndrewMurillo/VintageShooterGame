@@ -440,13 +440,20 @@ void ofApp::mouseMoved(int x, int y ){
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-
+void ofApp::mouseDragged(int x, int y, int button) {
+	if (isGameInit) {
+		ofPoint mouseCur = ofPoint(x, y);
+		glm::vec3 difference = mouseCur - mouseLast;
+		mouseLast = mouseCur;
+		newPos = player.trans + difference;
+		if (!(newPos.x < 0 || newPos.y < 0 || newPos.x > ofGetWidth() || newPos.y > ofGetHeight()))
+			player.setPosition(newPos);
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-
+	mouseLast = ofPoint(x, y);
 }
 
 //--------------------------------------------------------------

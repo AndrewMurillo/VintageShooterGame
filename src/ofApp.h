@@ -136,7 +136,7 @@ class ofApp : public ofBaseApp{
 		ofImage playerImage;
 		ofImage background;
 		ofSoundPlayer playerSound;
-		glm::vec3 mouse_last;
+		glm::vec3 mouseLast;
 		glm::vec3 newPos;
 		bool playerImageLoaded;
 		bool playerProjLoaded;
