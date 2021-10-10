@@ -332,10 +332,20 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	//DRAW PLAYER
+	//	CHECK IF GAME HAS STARTED
 	//
-	player.draw();
-	
+	if (isGameInit) {
+		//	DRAW BACKGROUND
+		//
+		background.draw(0, 0);
+		//	DRAW PLAYER
+		//
+		player.draw();
+	}
+	else { //	DRAW START SCREEN
+		ofDrawBitmapString("PRESS SPACE TO START", ofPoint(ofGetWindowWidth() / 2 - 90, ofGetWindowHeight() / 2));
+	}
+
 	if (!bHide) {
 		gui.draw();
 	}
