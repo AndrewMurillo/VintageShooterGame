@@ -315,7 +315,7 @@ void ofApp::setup(){
 	gui.add(offset.setup("offset", 20, 1, 500));
 	gui.add(life.setup("life", 5, .1, 10));
 	gui.add(velocity.setup("velocity", glm::vec3(0, 100, 0), glm::vec3(-1000, -1000, -1000), glm::vec3(1000, 1000, 1000)));
-	gui.add(playerSpeed.setup("playerSpeed", 2, 1, 10));
+	gui.add(playerSpeed.setup("playerSpeed", 5, 1, 20));
 	gui.add(playerRotate.setup("playerRotate", 2, 1, 45));
 	bHide = false;
 }
@@ -337,6 +337,7 @@ void ofApp::draw(){
 	if (isGameInit) {
 		//	DRAW BACKGROUND
 		//
+		ofSetColor(255, 255, 255, 255);
 		background.draw(0, 0);
 		//	DRAW PLAYER
 		//
@@ -355,20 +356,47 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 	switch (key) {
 	case OF_KEY_UP:
+		if (isGameInit) {
+			newPos = player.trans - glm::vec3(0, 1, 0) * 5;
+			if (newPos.y >= 0) {
+				player.setPosition(newPos);
+			}
+			//player->setPosition(player->trans + player->getHeading() * 3); //move relative to player heading
+		}
 		break;
 	case OF_KEY_DOWN:
+		if (isGameInit) {
+			newPos = player.trans + glm::vec3(0, 1, 0) * 5;
+			if (newPos.y <= ofGetHeight()) {
+				player.setPosition(newPos);
+			}
+		}
 		break;
 	case OF_KEY_RIGHT:
-		player.setPosition(glm::vec3(player.trans.x - playerSpeed, player.trans.y, 0));
+		if (isGameInit) {
+			newPos = player.trans + glm::vec3(1, 0, 0) * 5;
+			if (newPos.x <= ofGetWidth()) {
+				player.setPosition(newPos);
+			}
+		}
 		break;
 	case OF_KEY_LEFT:
-		player.setPosition(glm::vec3(player.trans.x + playerSpeed, player.trans.y, 0));
+		if (isGameInit) {
+			newPos = player.trans - glm::vec3(1, 0, 0) * 5;
+			if (newPos.x >= 0) {
+				player.setPosition(newPos);
+			}
+		}
 		break;
 	case 'a':
-		player.rot -= playerRotate;
+		if (isGameInit) {
+			player.rot -= playerRotate;
+		}
 		break;
 	case 'd':
-		player.rot += playerRotate;
+		if (isGameInit) {
+			player.rot += playerRotate;
+		}
 		break;
 	case 'h':
 		bHide = !bHide;
