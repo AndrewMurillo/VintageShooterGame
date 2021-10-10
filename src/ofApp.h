@@ -127,24 +127,20 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-		
-		// Data Structure to hold emitters
-		vector<Emitter *> emitters;
-		int numEmitters;
 
-		ofImage defaultImage;
 		// Application data
+		ofImage playerProjImage;
+		ofImage playerImage;
+		ofImage background;
+		ofSoundPlayer playerSound;
 		glm::vec3 mouse_last;
-		bool imageLoaded;
+		bool playerImageLoaded;
+		bool playerProjLoaded;
 		bool isPaused;
 
 		// Player object
-		Sprite playerSprite;
-		//Emitter *launcherLeft = NULL;
-		//Emitter *launcherRight = NULL;
 		Helicopter player;
 		bool isGameInit = false;
-		bool isFire = false;
 
 		// UI
 		bool bFullscreen = false;
@@ -158,4 +154,5 @@ class ofApp : public ofBaseApp{
 		ofxPanel gui;
 		ofxFloatSlider playerSpeed;
 		ofxFloatSlider playerRotate;
+		ofxIntSlider offset;
 };

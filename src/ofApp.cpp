@@ -273,6 +273,29 @@ void Helicopter::setImage(ofImage img) {
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+	//load child image
+	if (playerProjImage.load("images/ball.png")) {
+		playerProjLoaded = true;
+	}
+	else {
+		ofLogFatalError("can't load image: images/ball.png");
+		ofExit();
+	}
+	//load Player image
+	if (playerImage.load("images/turret.png")) {
+		playerImageLoaded = true;
+	}
+	else {
+		ofLogFatalError("can't load image: images/turret.png");
+		ofExit();
+	}
+	//load background
+	if (!background.load("images/plains.png")) {
+		ofLogFatalError("can't load image: images/plains.png");
+		ofExit();
+	}
+	//load turret sound
+	playerSound.load("sounds/blast.wav");
 	//	PLAYER SETUP
 	//
 	player.setPosition(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
@@ -315,26 +338,20 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 	switch (key) {
 	case OF_KEY_UP:
-		playerSprite.setPosition(glm::vec3(playerSprite.trans.x, playerSprite.trans.y + playerSpeed, 0));
 		break;
 	case OF_KEY_DOWN:
-		playerSprite.setPosition(glm::vec3(playerSprite.trans.x, playerSprite.trans.y - playerSpeed, 0));
 		break;
 	case OF_KEY_RIGHT:
 		player.setPosition(glm::vec3(player.trans.x - playerSpeed, player.trans.y, 0));
-		playerSprite.setPosition(glm::vec3(playerSprite.trans.x - playerSpeed, playerSprite.trans.y, 0));
 		break;
 	case OF_KEY_LEFT:
 		player.setPosition(glm::vec3(player.trans.x + playerSpeed, player.trans.y, 0));
-		playerSprite.setPosition(glm::vec3(playerSprite.trans.x + playerSpeed, playerSprite.trans.y, 0));
 		break;
 	case 'a':
 		player.rot -= playerRotate;
-		playerSprite.rot -= playerRotate;
 		break;
 	case 'd':
 		player.rot += playerRotate;
-		playerSprite.rot += playerRotate;
 		break;
 	case 'h':
 		bHide = !bHide;
@@ -347,15 +364,6 @@ void ofApp::keyPressed(int key){
 	{
 		if (!isGameInit) {
 			isGameInit = true;
-		}
-		isFire = !isFire;
-		if (isFire) {
-			//launcherLeft->start();
-			//launcherRight->start();
-		}
-		else {
-			//launcherLeft->stop();
-			//launcherRight->stop();
 		}
 		break;
 	}
