@@ -271,6 +271,11 @@ void Helicopter::setImage(ofImage img) {
 	height = image.getHeight();
 }
 
+void Helicopter::setRate(float r) {
+	child1->rate = r;
+	child2->rate = r;
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
 	//load child image
@@ -307,6 +312,7 @@ void ofApp::setup(){
 	//
 	gui.setup();
 	gui.add(rate.setup("rate", 1, 1, 10));
+	gui.add(offset.setup("offset", 20, 1, 500));
 	gui.add(life.setup("life", 5, .1, 10));
 	gui.add(velocity.setup("velocity", glm::vec3(0, 100, 0), glm::vec3(-1000, -1000, -1000), glm::vec3(1000, 1000, 1000)));
 	gui.add(playerSpeed.setup("playerSpeed", 2, 1, 10));
@@ -318,6 +324,7 @@ void ofApp::setup(){
 void ofApp::update(){
 	//	CHECK IF GAME HAS STARTED
 	//
+	player.setRate(rate);
 	if (isGameInit) {
 		player.update();
 	}

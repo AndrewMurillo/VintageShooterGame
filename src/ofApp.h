@@ -98,7 +98,9 @@ public:
 	void start();
 	void stop();
 	void setImage(ofImage);
+	void setRate(float);
 	float speed;    //   in pixels/sec
+	float rate;
 	glm::vec3 velocity; // in pixels/sec
 	ofImage image; //  time in ms
 	string name;
