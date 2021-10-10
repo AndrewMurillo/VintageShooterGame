@@ -125,9 +125,10 @@ Emitter::Emitter(SpriteSystem *spriteSys) {
 	rate = 1;    // sprites/sec
 	haveChildImage = false;
 	haveImage = false;
+	haveSound = false;
 	velocity = getHeading() * 100;
 	//velocity = glm::vec3(0, 1000, 0);
-	drawable = true;
+	drawable = false;
 	width = 50;
 	height = 50;
 }
@@ -163,12 +164,13 @@ void Emitter::update() {
 			// spawn a new sprite
 			Sprite sprite;
 			if (haveChildImage) sprite.setImage(childImage);
-			sprite.velocity = velocity;
+			sprite.velocity = getHeading() * 100;
 			sprite.lifespan = lifespan;
 			sprite.setPosition(trans);
 			sprite.birthtime = time;
 			sys->add(sprite);
 			lastSpawned = time;
+			if(haveSound) sound.play();
 		}
 	}
 	sys->update();
@@ -205,6 +207,11 @@ void Emitter::setImage(ofImage img) {
 
 void Emitter::setRate(float r) {
 	rate = r;
+}
+
+void Emitter::setSound(ofSoundPlayer s) {
+	haveSound = true;
+	sound = s;
 }
 
 //--------------------------------------------------------------
@@ -311,7 +318,12 @@ void ofApp::setup(){
 	player.setPosition(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
 	player.child1->setPosition(glm::vec3(ofGetWidth() / 2.0 + 20, ofGetHeight() / 2.0, 0));
 	player.child2->setPosition(glm::vec3(ofGetWidth() / 2.0 - 20, ofGetHeight() / 2.0, 0));
-	
+	player.setImage(playerImage);
+	player.child1->setChildImage(playerProjImage);
+	player.child2->setChildImage(playerProjImage);
+	player.child1->setSound(playerSound);
+	player.child2->setSound(playerSound);
+
 	//	GUI SETUP
 	//
 	gui.setup();

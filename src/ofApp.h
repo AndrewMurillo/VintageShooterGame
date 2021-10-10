@@ -73,6 +73,7 @@ public:
 	void setChildImage(ofImage);
 	void setImage(ofImage);
 	void setRate(float);
+	void setSound(ofSoundPlayer);
 	void update();
 	SpriteSystem *sys;
 	float rate;
@@ -82,9 +83,11 @@ public:
 	float lastSpawned;
 	ofImage childImage;
 	ofImage image;
+	ofSoundPlayer sound;
 	bool drawable;
 	bool haveChildImage;
 	bool haveImage;
+	bool haveSound;
 	float width, height;
 };
 
