@@ -227,6 +227,12 @@ Helicopter::Helicopter() {
 	child2 = new Emitter(new SpriteSystem());
 }
 
+void Helicopter::setup(glm::vec3 pos) {
+	setPosition(pos);
+	child1->setPosition(glm::vec3(pos.x + 20, pos.y, 0));
+	child2->setPosition(glm::vec3(pos.x - 20, pos.y, 0));
+}
+
 void Helicopter::draw() {
 	ofSetColor(255, 255, 255, 255);
 	ofPushMatrix();
@@ -288,8 +294,19 @@ void Helicopter::setRate(float r) {
 	child2->rate = r;
 }
 
+void Helicopter::setProjImage(ofImage img) {
+	child1->setChildImage(img);
+	child2->setChildImage(img);
+}
+
+void Helicopter::setProjSound(ofSoundPlayer sound) {
+	child1->setSound(sound);
+	child2->setSound(sound);
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
+	ofSetFullscreen(true);
 	//load child image
 	if (playerProjImage.load("images/ball.png")) {
 		playerProjLoaded = true;
@@ -315,14 +332,14 @@ void ofApp::setup(){
 	playerSound.load("sounds/blast.wav");
 	//	PLAYER SETUP
 	//
-	player.setPosition(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
-	player.child1->setPosition(glm::vec3(ofGetWidth() / 2.0 + 20, ofGetHeight() / 2.0, 0));
-	player.child2->setPosition(glm::vec3(ofGetWidth() / 2.0 - 20, ofGetHeight() / 2.0, 0));
+	player.setup(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
 	player.setImage(playerImage);
-	player.child1->setChildImage(playerProjImage);
-	player.child2->setChildImage(playerProjImage);
-	player.child1->setSound(playerSound);
-	player.child2->setSound(playerSound);
+	player.setProjImage(playerProjImage);
+	player.setProjSound(playerSound);
+
+	//	OTHER
+	//
+	score = 0;
 
 	//	GUI SETUP
 	//
@@ -418,8 +435,8 @@ void ofApp::keyPressed(int key){
 		bHide = !bHide;
 		break;
 	case 'f':
-		bFullscreen = !bFullscreen;
-		ofSetFullscreen(bFullscreen);
+		//bFullscreen = !bFullscreen;
+		//ofSetFullscreen(bFullscreen);
 		break;
 	case ' ':
 		if (!isGameInit) {

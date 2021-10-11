@@ -96,11 +96,14 @@ public:
 class Helicopter : public BaseObject {
 public:
 	Helicopter();
+	void setup(glm::vec3);
 	void draw();
 	void update();
 	void start();
 	void stop();
 	void setImage(ofImage);
+	void setProjImage(ofImage);
+	void setProjSound(ofSoundPlayer);
 	void setRate(float);
 	float speed;    //   in pixels/sec
 	float rate;
@@ -113,6 +116,17 @@ public:
 	Emitter *child1;
 	Emitter *child2;
 
+};
+
+class Player {
+public:
+	Helicopter baseObj;
+	int lives;
+	bool isLeft, isRight, isUp, isDown;
+
+	void setup(Helicopter);
+	void update();
+	void draw();
 };
 
 class ofApp : public ofBaseApp{
@@ -144,6 +158,7 @@ class ofApp : public ofBaseApp{
 		bool playerImageLoaded;
 		bool playerProjLoaded;
 		bool isPaused;
+		int score;
 
 		// Player object
 		Helicopter player;
