@@ -125,9 +125,10 @@ Emitter::Emitter(SpriteSystem *spriteSys) {
 	rate = 1;    // sprites/sec
 	haveChildImage = false;
 	haveImage = false;
+	haveSound = false;
 	velocity = getHeading() * 100;
 	//velocity = glm::vec3(0, 1000, 0);
-	drawable = true;
+	drawable = false;
 	width = 50;
 	height = 50;
 }
@@ -163,12 +164,13 @@ void Emitter::update() {
 			// spawn a new sprite
 			Sprite sprite;
 			if (haveChildImage) sprite.setImage(childImage);
-			sprite.velocity = velocity;
+			sprite.velocity = getHeading() * 100;
 			sprite.lifespan = lifespan;
 			sprite.setPosition(trans);
 			sprite.birthtime = time;
 			sys->add(sprite);
 			lastSpawned = time;
+			if(haveSound) sound.play();
 		}
 	}
 	sys->update();
@@ -207,12 +209,18 @@ void Emitter::setRate(float r) {
 	rate = r;
 }
 
+void Emitter::setSound(ofSoundPlayer s) {
+	haveSound = true;
+	sound = s;
+}
+
 //--------------------------------------------------------------
 Helicopter::Helicopter() {
 	speed = 0;
 	velocity = glm::vec3(0, 0, 0);
 	bSelected = false;
 	haveImage = false;
+	started = false;
 	width = 60;
 	height = 80;
 	child1 = new Emitter(new SpriteSystem());
@@ -254,12 +262,16 @@ void Helicopter::update() {
 
 void Helicopter::start() {
 	// Start children emitters
-	child1->start();
-	child2->start();
+	if (!started) {
+		started = true;
+		child1->start();
+		child2->start();
+	}
 }
 
 void Helicopter::stop() {
 	// Stop children emitters
+	started = false;
 	child1->stop();
 	child2->stop();
 }
@@ -271,22 +283,55 @@ void Helicopter::setImage(ofImage img) {
 	height = image.getHeight();
 }
 
+void Helicopter::setRate(float r) {
+	child1->rate = r;
+	child2->rate = r;
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
+	//load child image
+	if (playerProjImage.load("images/ball.png")) {
+		playerProjLoaded = true;
+	}
+	else {
+		ofLogFatalError("can't load image: images/ball.png");
+		ofExit();
+	}
+	//load Player image
+	if (playerImage.load("images/turret.png")) {
+		playerImageLoaded = true;
+	}
+	else {
+		ofLogFatalError("can't load image: images/turret.png");
+		ofExit();
+	}
+	//load background
+	if (!background.load("images/plains.png")) {
+		ofLogFatalError("can't load image: images/plains.png");
+		ofExit();
+	}
+	//load turret sound
+	playerSound.load("sounds/blast.wav");
 	//	PLAYER SETUP
 	//
 	player.setPosition(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
 	player.child1->setPosition(glm::vec3(ofGetWidth() / 2.0 + 20, ofGetHeight() / 2.0, 0));
 	player.child2->setPosition(glm::vec3(ofGetWidth() / 2.0 - 20, ofGetHeight() / 2.0, 0));
-	player.start();
-	
+	player.setImage(playerImage);
+	player.child1->setChildImage(playerProjImage);
+	player.child2->setChildImage(playerProjImage);
+	player.child1->setSound(playerSound);
+	player.child2->setSound(playerSound);
+
 	//	GUI SETUP
 	//
 	gui.setup();
 	gui.add(rate.setup("rate", 1, 1, 10));
+	gui.add(offset.setup("offset", 20, 1, 500));
 	gui.add(life.setup("life", 5, .1, 10));
 	gui.add(velocity.setup("velocity", glm::vec3(0, 100, 0), glm::vec3(-1000, -1000, -1000), glm::vec3(1000, 1000, 1000)));
-	gui.add(playerSpeed.setup("playerSpeed", 2, 1, 10));
+	gui.add(playerSpeed.setup("playerSpeed", 5, 1, 20));
 	gui.add(playerRotate.setup("playerRotate", 2, 1, 45));
 	bHide = false;
 }
@@ -295,6 +340,7 @@ void ofApp::setup(){
 void ofApp::update(){
 	//	CHECK IF GAME HAS STARTED
 	//
+	player.setRate(rate);
 	if (isGameInit) {
 		player.update();
 	}
@@ -302,10 +348,21 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	//DRAW PLAYER
+	//	CHECK IF GAME HAS STARTED
 	//
-	player.draw();
-	
+	if (isGameInit) {
+		//	DRAW BACKGROUND
+		//
+		ofSetColor(255, 255, 255, 255);
+		background.draw(0, 0);
+		//	DRAW PLAYER
+		//
+		player.draw();
+	}
+	else { //	DRAW START SCREEN
+		ofDrawBitmapString("PRESS SPACE TO START", ofPoint(ofGetWindowWidth() / 2 - 90, ofGetWindowHeight() / 2));
+	}
+
 	if (!bHide) {
 		gui.draw();
 	}
@@ -315,26 +372,47 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 	switch (key) {
 	case OF_KEY_UP:
-		playerSprite.setPosition(glm::vec3(playerSprite.trans.x, playerSprite.trans.y + playerSpeed, 0));
+		if (isGameInit) {
+			newPos = player.trans - glm::vec3(0, 1, 0) * 5;
+			if (newPos.y >= 0) {
+				player.setPosition(newPos);
+			}
+			//player->setPosition(player->trans + player->getHeading() * 3); //move relative to player heading
+		}
 		break;
 	case OF_KEY_DOWN:
-		playerSprite.setPosition(glm::vec3(playerSprite.trans.x, playerSprite.trans.y - playerSpeed, 0));
+		if (isGameInit) {
+			newPos = player.trans + glm::vec3(0, 1, 0) * 5;
+			if (newPos.y <= ofGetHeight()) {
+				player.setPosition(newPos);
+			}
+		}
 		break;
 	case OF_KEY_RIGHT:
-		player.setPosition(glm::vec3(player.trans.x - playerSpeed, player.trans.y, 0));
-		playerSprite.setPosition(glm::vec3(playerSprite.trans.x - playerSpeed, playerSprite.trans.y, 0));
+		if (isGameInit) {
+			newPos = player.trans + glm::vec3(1, 0, 0) * 5;
+			if (newPos.x <= ofGetWidth()) {
+				player.setPosition(newPos);
+			}
+		}
 		break;
 	case OF_KEY_LEFT:
-		player.setPosition(glm::vec3(player.trans.x + playerSpeed, player.trans.y, 0));
-		playerSprite.setPosition(glm::vec3(playerSprite.trans.x + playerSpeed, playerSprite.trans.y, 0));
+		if (isGameInit) {
+			newPos = player.trans - glm::vec3(1, 0, 0) * 5;
+			if (newPos.x >= 0) {
+				player.setPosition(newPos);
+			}
+		}
 		break;
 	case 'a':
-		player.rot -= playerRotate;
-		playerSprite.rot -= playerRotate;
+		if (isGameInit) {
+			player.rot -= playerRotate;
+		}
 		break;
 	case 'd':
-		player.rot += playerRotate;
-		playerSprite.rot += playerRotate;
+		if (isGameInit) {
+			player.rot += playerRotate;
+		}
 		break;
 	case 'h':
 		bHide = !bHide;
@@ -344,21 +422,11 @@ void ofApp::keyPressed(int key){
 		ofSetFullscreen(bFullscreen);
 		break;
 	case ' ':
-	{
 		if (!isGameInit) {
 			isGameInit = true;
 		}
-		isFire = !isFire;
-		if (isFire) {
-			//launcherLeft->start();
-			//launcherRight->start();
-		}
-		else {
-			//launcherLeft->stop();
-			//launcherRight->stop();
-		}
+		player.start();
 		break;
-	}
 	case 'p':
 		isPaused = !isPaused;
 		break;
@@ -369,7 +437,13 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+	switch (key) {
+	case ' ':
+		player.stop();
+		break;
+	default:
+		break;
+	}
 }
 
 //--------------------------------------------------------------
@@ -378,13 +452,20 @@ void ofApp::mouseMoved(int x, int y ){
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-
+void ofApp::mouseDragged(int x, int y, int button) {
+	if (isGameInit) {
+		ofPoint mouseCur = ofPoint(x, y);
+		glm::vec3 difference = mouseCur - mouseLast;
+		mouseLast = mouseCur;
+		newPos = player.trans + difference;
+		if (!(newPos.x < 0 || newPos.y < 0 || newPos.x > ofGetWidth() || newPos.y > ofGetHeight()))
+			player.setPosition(newPos);
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-
+	mouseLast = ofPoint(x, y);
 }
 
 //--------------------------------------------------------------

@@ -73,6 +73,7 @@ public:
 	void setChildImage(ofImage);
 	void setImage(ofImage);
 	void setRate(float);
+	void setSound(ofSoundPlayer);
 	void update();
 	SpriteSystem *sys;
 	float rate;
@@ -82,9 +83,11 @@ public:
 	float lastSpawned;
 	ofImage childImage;
 	ofImage image;
+	ofSoundPlayer sound;
 	bool drawable;
 	bool haveChildImage;
 	bool haveImage;
+	bool haveSound;
 	float width, height;
 };
 
@@ -98,11 +101,14 @@ public:
 	void start();
 	void stop();
 	void setImage(ofImage);
+	void setRate(float);
 	float speed;    //   in pixels/sec
+	float rate;
 	glm::vec3 velocity; // in pixels/sec
 	ofImage image; //  time in ms
 	string name;
 	bool haveImage;
+	bool started;
 	float width, height;
 	Emitter *child1;
 	Emitter *child2;
@@ -127,24 +133,21 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-		
-		// Data Structure to hold emitters
-		vector<Emitter *> emitters;
-		int numEmitters;
 
-		ofImage defaultImage;
 		// Application data
-		glm::vec3 mouse_last;
-		bool imageLoaded;
+		ofImage playerProjImage;
+		ofImage playerImage;
+		ofImage background;
+		ofSoundPlayer playerSound;
+		glm::vec3 mouseLast;
+		glm::vec3 newPos;
+		bool playerImageLoaded;
+		bool playerProjLoaded;
 		bool isPaused;
 
 		// Player object
-		Sprite playerSprite;
-		//Emitter *launcherLeft = NULL;
-		//Emitter *launcherRight = NULL;
 		Helicopter player;
 		bool isGameInit = false;
-		bool isFire = false;
 
 		// UI
 		bool bFullscreen = false;
@@ -158,4 +161,5 @@ class ofApp : public ofBaseApp{
 		ofxPanel gui;
 		ofxFloatSlider playerSpeed;
 		ofxFloatSlider playerRotate;
+		ofxIntSlider offset;
 };
