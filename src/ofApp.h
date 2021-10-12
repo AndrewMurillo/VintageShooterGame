@@ -4,8 +4,6 @@
 #include "ofxGui.h"
 
 
-typedef enum { MoveStop, MoveLeft, MoveRight, MoveUp, MoveDown } MoveDir ;
-
 // This is a base object that all drawable object inherit from
 // It is possible this will be replaced by ofNode when we move to 3D
 //
@@ -122,9 +120,11 @@ class Player : public Helicopter{
 public:
 	void update();
 	void move();
+	void shoot();
 	int lives;
 	bool isLeft, isRight, isUp, isDown;
 	bool isRotClockwise, isRotCClockwise;
+	bool isFire;
 };
 
 class ofApp : public ofBaseApp{

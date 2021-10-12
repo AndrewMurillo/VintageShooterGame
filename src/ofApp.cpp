@@ -305,6 +305,7 @@ void Helicopter::setProjSound(ofSoundPlayer sound) {
 }
 //--------------------------------------------------------------
 void Player::update() {
+	shoot();
 	move();
 	Helicopter::update();
 }
@@ -342,6 +343,13 @@ void Player::move() {
 	if (isRotClockwise) {
 		rot += 5;
 	}
+}
+
+void Player::shoot() {
+	if (isFire) {
+		start();
+	}
+	//stop();
 }
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -460,7 +468,8 @@ void ofApp::keyPressed(int key){
 		break;
 	case ' ':
 		if (isGameInit) {
-			player.start();
+			player.isFire = true;
+			//player.start();
 		}
 		if (!isGameInit) {
 			isGameInit = true;
@@ -497,6 +506,7 @@ void ofApp::keyReleased(int key){
 		player.isRotClockwise = false;
 		break;
 	case ' ':
+		player.isFire = false;
 		player.stop();
 		break;
 	default:
