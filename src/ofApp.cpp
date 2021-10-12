@@ -62,6 +62,46 @@ void Sprite::draw() {
 	ofPopMatrix();
 }
 
+void Sprite::update() {
+	cout << "Sprite update()" << endl;
+	trans += velocity / ofGetFrameRate();
+}
+
+//-------------------------------------------------------------
+PathSprite::PathSprite() : Sprite() {
+	cout << "PathSprite made" << endl;
+}
+
+void PathSprite::update() {
+	cout << "PathSprite update()" << endl;
+	float speed = glm::length(velocity);
+	glm::vec3 p = trans + (getHeading() * speed);
+	trans = curveEval(p.x, scale, cycles);
+	//tri.pos = newPos;
+	// find angle to rotate to new heading; we rotate
+	// from "home" position;  (you could rotate incrementally
+	// from last position as well, but you need to keep previous
+	// heading;
+	//
+	glm::vec3 homeOrient;
+	if (haveImage)
+		homeOrient = glm::vec3(0, -1, 0);  // image needs to be flipped;
+	else
+		homeOrient = glm::vec3(0, 1, 0);
+
+
+	// set rotation (angle between heading and home orientation)
+	//
+	rot = -glm::degrees(glm::orientedAngle(getHeading(), homeOrient, glm::vec3(0, 0, 1)));
+}
+
+glm::vec3 PathSprite::curveEval(float x, float scale, float cycles) {
+	float u = (cycles * x * PI) / ofGetWidth();
+	return glm::vec3(x, -scale * sin(u) + (ofGetHeight() / 2), 0);
+}
+
+//-------------------------------------------------------------
+
 //  Add a Sprite to the Sprite System
 //
 void SpriteSystem::add(Sprite s) {
@@ -103,7 +143,7 @@ void SpriteSystem::update() {
 	//  Move sprite
 	//
 	for (int i = 0; i < sprites.size(); i++) {
-		sprites[i].trans += sprites[i].velocity / ofGetFrameRate();
+		sprites[i].update();
 	}
 }
 
@@ -213,7 +253,86 @@ void Emitter::setSound(ofSoundPlayer s) {
 	haveSound = true;
 	sound = s;
 }
+//--------------------------------------------------------------
+//  Create a new Emitter - needs a SpriteSystem
+//
+PathEmitter::PathEmitter(SpriteSystem *spriteSys) : Emitter(spriteSys) {
+	sys = spriteSys;
+}
 
+void PathEmitter::update() {
+	cout << "PathEmitter update()" << endl;
+	if (started) {
+
+		float time = ofGetElapsedTimeMillis();
+		if ((time - lastSpawned) > (1000.0 / rate)) {
+			// spawn a new sprite
+			PathSprite sprite;
+			if (haveChildImage) sprite.setImage(childImage);
+			sprite.velocity = getHeading() * 100;
+			sprite.lifespan = lifespan;
+			sprite.setPosition(trans);
+			sprite.birthtime = time;
+			sys->add(sprite);
+			lastSpawned = time;
+			if (haveSound) sound.play();
+		}
+	}
+	sys->update();
+}
+/**
+void PathEmitter::draw() {
+	if (drawable) {
+		ofPushMatrix();
+		ofMultMatrix(getTransformMatrix());
+		if (haveImage) {
+			image.draw(-image.getWidth() / 2.0, -image.getHeight() / 2.0);
+		}
+		else {
+			ofSetColor(0, 0, 200);
+			ofDrawRectangle(-width / 2, -height / 2, width, height);
+		}
+		ofPopMatrix();
+	}
+	sys->draw();
+}
+
+void PathEmitter::start() {
+	started = true;
+	//lastSpawned = ofGetElapsedTimeMillis();
+}
+
+void PathEmitter::stop() {
+	started = false;
+}
+
+
+void PathEmitter::setLifespan(float life) {
+	lifespan = life;
+}
+
+void PathEmitter::setSpeed(float s) {
+	speed = s;
+}
+
+void PathEmitter::setChildImage(ofImage img) {
+	childImage = img;
+	haveChildImage = true;
+}
+
+void PathEmitter::setImage(ofImage img) {
+	image = img;
+}
+
+void PathEmitter::setRate(float r) {
+	rate = r;
+}
+
+void PathEmitter::setSound(ofSoundPlayer s) {
+	haveSound = true;
+	sound = s;
+}
+*/
 //--------------------------------------------------------------
 Helicopter::Helicopter() {
 	speed = 0;
@@ -387,6 +506,11 @@ void ofApp::setup(){
 	//	OTHER
 	//
 	score = 0;
+	emit1 = new PathEmitter(new SpriteSystem());
+	emit1->setPosition(glm::vec3(0, ofGetWindowHeight() / 2.0, 0));
+	emit1->rot -= 90;
+	emit1->drawable = true;
+	emit1->lifespan = 10000;
 
 	//	GUI SETUP
 	//
@@ -407,6 +531,7 @@ void ofApp::update(){
 	player.setRate(rate);
 	if (isGameInit) {
 		player.update();
+		emit1->update();
 	}
 }
 
@@ -422,6 +547,9 @@ void ofApp::draw(){
 		//	DRAW PLAYER
 		//
 		player.draw();
+		//	DRAW ENEMIES
+		//
+		emit1->draw();
 	}
 	else { //	DRAW START SCREEN
 		ofDrawBitmapString("PRESS SPACE TO START", ofPoint(ofGetWindowWidth() / 2 - 90, ofGetWindowHeight() / 2));
@@ -473,6 +601,7 @@ void ofApp::keyPressed(int key){
 		}
 		if (!isGameInit) {
 			isGameInit = true;
+			emit1->start();
 		}
 		//player.isFire();
 		break;

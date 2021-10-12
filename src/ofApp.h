@@ -32,7 +32,9 @@ public:
 class Sprite : public BaseObject {
 public:
 	Sprite();
+	virtual ~Sprite() = default;
 	void draw();
+	virtual void update();
 	float age();
 	void setImage(ofImage);
 	float speed;    //   in pixels/sec
@@ -43,6 +45,15 @@ public:
 	string name;
 	bool haveImage;
 	float width, height;
+};
+
+class PathSprite : public Sprite {
+public:
+	PathSprite();
+	void update() override;
+	glm::vec3 curveEval(float x, float scale, float cycles);
+	float scale;
+	float cycles;
 };
 
 //  Manages all Sprites in a system.  You can create multiple systems
@@ -72,7 +83,7 @@ public:
 	void setImage(ofImage);
 	void setRate(float);
 	void setSound(ofSoundPlayer);
-	void update();
+	virtual void update();
 	SpriteSystem *sys;
 	float rate;
 	glm::vec3 velocity;
@@ -89,8 +100,12 @@ public:
 	float width, height;
 };
 
-//new class
-//
+class PathEmitter : public Emitter {
+public:
+	PathEmitter(SpriteSystem *);
+	void update();
+};
+
 class Helicopter : public BaseObject {
 public:
 	Helicopter();
@@ -153,14 +168,18 @@ class ofApp : public ofBaseApp{
 		ofSoundPlayer playerSound;
 		glm::vec3 mouseLast;
 		glm::vec3 newPos;
-		bool playerImageLoaded;
-		bool playerProjLoaded;
+		bool isGameInit = false;
 		bool isPaused;
 		int score;
 
 		// Player object
 		Player player;
-		bool isGameInit = false;
+		bool playerImageLoaded;
+		bool playerProjLoaded;
+		
+		// Enemy Emitters
+		//vector<Emitters *> emitters
+		PathEmitter *emit1;
 
 		// UI
 		bool bFullscreen = false;
