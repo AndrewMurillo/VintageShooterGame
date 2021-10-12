@@ -118,15 +118,13 @@ public:
 
 };
 
-class Player {
+class Player : public Helicopter{
 public:
-	Helicopter baseObj;
+	void update();
+	void move();
 	int lives;
 	bool isLeft, isRight, isUp, isDown;
-
-	void setup(Helicopter);
-	void update();
-	void draw();
+	bool isRotClockwise, isRotCClockwise;
 };
 
 class ofApp : public ofBaseApp{
@@ -161,7 +159,7 @@ class ofApp : public ofBaseApp{
 		int score;
 
 		// Player object
-		Helicopter player;
+		Player player;
 		bool isGameInit = false;
 
 		// UI

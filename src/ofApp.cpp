@@ -180,7 +180,7 @@ void Emitter::update() {
 //
 void Emitter::start() {
 	started = true;
-	lastSpawned = ofGetElapsedTimeMillis();
+	//lastSpawned = ofGetElapsedTimeMillis();
 }
 
 void Emitter::stop() {
@@ -303,7 +303,46 @@ void Helicopter::setProjSound(ofSoundPlayer sound) {
 	child1->setSound(sound);
 	child2->setSound(sound);
 }
-
+//--------------------------------------------------------------
+void Player::update() {
+	move();
+	Helicopter::update();
+}
+void Player::move() {
+	int newX = trans.x;
+	if (isLeft) {
+		newX = trans.x - 5;
+		if (newX < 0) {
+			newX = trans.x;
+		}
+	}
+	if (isRight) {
+		newX = trans.x + 5;
+		if (newX > ofGetWindowWidth()) {
+			newX = trans.x;
+		}
+	}
+	int newY = trans.y;
+	if (isUp) {
+		newY = trans.y - 5;
+		if (newY < 0) {
+			newY = trans.y;
+		}
+	}
+	if (isDown) {
+		newY = trans.y + 5;
+		if (newY > ofGetWindowHeight()) {
+			newY = trans.y;
+		}
+	}
+	setPosition(glm::vec3(newX, newY, 0));
+	if (isRotCClockwise) {
+		rot -= 5;
+	}
+	if (isRotClockwise) {
+		rot += 5;
+	}
+}
 //--------------------------------------------------------------
 void ofApp::setup(){
 	ofSetFullscreen(true);
@@ -389,47 +428,28 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 	switch (key) {
 	case OF_KEY_UP:
-		if (isGameInit) {
-			newPos = player.trans - glm::vec3(0, 1, 0) * 5;
-			if (newPos.y >= 0) {
-				player.setPosition(newPos);
-			}
-			//player->setPosition(player->trans + player->getHeading() * 3); //move relative to player heading
-		}
+		player.isUp = true;
+		player.isDown = false;
 		break;
 	case OF_KEY_DOWN:
-		if (isGameInit) {
-			newPos = player.trans + glm::vec3(0, 1, 0) * 5;
-			if (newPos.y <= ofGetHeight()) {
-				player.setPosition(newPos);
-			}
-		}
+		player.isDown = true;
+		player.isUp = false;
 		break;
 	case OF_KEY_RIGHT:
-		if (isGameInit) {
-			newPos = player.trans + glm::vec3(1, 0, 0) * 5;
-			if (newPos.x <= ofGetWidth()) {
-				player.setPosition(newPos);
-			}
-		}
+		player.isRight = true;
+		player.isLeft = false;
 		break;
 	case OF_KEY_LEFT:
-		if (isGameInit) {
-			newPos = player.trans - glm::vec3(1, 0, 0) * 5;
-			if (newPos.x >= 0) {
-				player.setPosition(newPos);
-			}
-		}
+		player.isLeft = true;
+		player.isRight = false;
 		break;
 	case 'a':
-		if (isGameInit) {
-			player.rot -= playerRotate;
-		}
+		player.isRotCClockwise = true;
+		player.isRotClockwise = false;
 		break;
 	case 'd':
-		if (isGameInit) {
-			player.rot += playerRotate;
-		}
+		player.isRotClockwise = true;
+		player.isRotCClockwise = false;
 		break;
 	case 'h':
 		bHide = !bHide;
@@ -439,10 +459,13 @@ void ofApp::keyPressed(int key){
 		//ofSetFullscreen(bFullscreen);
 		break;
 	case ' ':
+		if (isGameInit) {
+			player.start();
+		}
 		if (!isGameInit) {
 			isGameInit = true;
 		}
-		player.start();
+		//player.isFire();
 		break;
 	case 'p':
 		isPaused = !isPaused;
@@ -455,6 +478,24 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
 	switch (key) {
+	case OF_KEY_UP:
+		player.isUp = false;
+		break;
+	case OF_KEY_DOWN:
+		player.isDown = false;
+		break;
+	case OF_KEY_RIGHT:
+		player.isRight = false;
+		break;
+	case OF_KEY_LEFT:
+		player.isLeft = false;
+		break;
+	case 'a':
+		player.isRotCClockwise = false;
+		break;
+	case 'd':
+		player.isRotClockwise = false;
+		break;
 	case ' ':
 		player.stop();
 		break;
