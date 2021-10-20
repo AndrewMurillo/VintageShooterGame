@@ -152,7 +152,8 @@ void SpriteSystem::update() {
 	// traversing at the same time, use an iterator.
 	//
 	while (s != sprites.end()) {
-		if (s->lifespan != -1 && s->age() > s->lifespan) {
+		// ADDED IF IT IS OFFSCREEN
+		if ((s->lifespan != -1 && s->age() > s->lifespan) || (s->trans.x < -50 || s->trans.y < -50 || s->trans.x > ofGetWindowWidth() + 50 || s->trans.y > ofGetWindowHeight() + 50)) {
 			//			cout << "deleting sprite: " << s->name << endl;
 			tmp = sprites.erase(s);
 			s = tmp;
@@ -361,17 +362,20 @@ Helicopter::Helicopter() {
 	started = false;
 	width = 60;
 	height = 80;
-	sys = new SpriteSystem();
-	child1 = new Emitter(sys);
-	child2 = new Emitter(sys);
+	emitters.push_back(new Emitter(new SpriteSystem()));
+	emitters.push_back(new Emitter(new SpriteSystem()));
+	//sys = new SpriteSystem();
+	//child1 = new Emitter(sys);
+	//child2 = new Emitter(sys);
 }
 
 void Helicopter::setup(glm::vec3 pos) {
 	setPosition(pos);
-	child1->setPosition(glm::vec3(pos.x + 20, pos.y, 0));
-	child2->setPosition(glm::vec3(pos.x - 20, pos.y, 0));
-	child1->setVelocity(glm::vec3(0,500,0));
-	child2->setVelocity(glm::vec3(0, 500, 0));
+	emitters[0]->setPosition(glm::vec3(pos.x + 20, pos.y, 0));
+	emitters[1]->setPosition(glm::vec3(pos.x - 20, pos.y, 0));
+	for (auto emit : emitters) {
+		emit->setVelocity(glm::vec3(0, 500, 0));
+	}
 }
 
 void Helicopter::draw() {
@@ -389,38 +393,41 @@ void Helicopter::draw() {
 	}
 	ofPopMatrix();
 	//	Call children emitters!
-	child1->draw();
-	child2->draw();
+	for (auto emit : emitters) {
+		emit->draw();
+	}
 }
 
 void Helicopter::update() {
 	//	Rotate offset -> affects where sprites are drawn!
 	glm::vec3 pos1 = glm::vec4(20, 0, 0, 0) * glm::rotate(glm::mat4(1.0), glm::radians(rot), glm::vec3(0, 0, 1));
 	//	Set pos at parent object + offset! (Reminder y is inverted on the screen!)
-	child1->setPosition(glm::vec3(trans.x + pos1.x, trans.y - pos1.y, 0));
-	child2->setPosition(glm::vec3(trans.x - pos1.x, trans.y + pos1.y, 0));
-	//	Set rot to parent rot
-	child1->rot = rot;
-	child2->rot = rot;
-	//	Call children update
-	child1->update();
-	child2->update();
+	emitters[0]->setPosition(glm::vec3(trans.x + pos1.x, trans.y - pos1.y, 0));
+	emitters[1]->setPosition(glm::vec3(trans.x - pos1.x, trans.y + pos1.y, 0));
+	for (auto emit : emitters) {
+		//	Set rot to parent rot
+		emit->rot = rot;
+		//	Call children update
+		emit->update();
+	}
 }
 
 void Helicopter::start() {
 	// Start children emitters
 	if (!started) {
 		started = true;
-		child1->start();
-		child2->start();
+		for (auto emit : emitters) {
+			emit->start();
+		}
 	}
 }
 
 void Helicopter::stop() {
 	// Stop children emitters
 	started = false;
-	child1->stop();
-	child2->stop();
+	for (auto emit : emitters) {
+		emit->stop();
+	}
 }
 
 void Helicopter::setImage(ofImage img) {
@@ -431,18 +438,21 @@ void Helicopter::setImage(ofImage img) {
 }
 
 void Helicopter::setRate(float r) {
-	child1->rate = r;
-	child2->rate = r;
+	for (auto emit : emitters) {
+		emit->rate = r;
+	}
 }
 
 void Helicopter::setProjImage(ofImage img) {
-	child1->setChildImage(img);
-	child2->setChildImage(img);
+	for (auto emit : emitters) {
+		emit->setChildImage(img);
+	}
 }
 
 void Helicopter::setProjSound(ofSoundPlayer sound) {
-	child1->setSound(sound);
-	child2->setSound(sound);
+	for (auto emit : emitters) {
+		emit->setSound(sound);
+	}
 }
 //--------------------------------------------------------------
 void Player::update() {
@@ -558,15 +568,16 @@ void ofApp::setup(){
 	numEmitters = 8;
 	// create an array of emitters and set their position;
 	//
-	enemySprites = new SpriteSystem();
+	//enemySprites = new SpriteSystem(); //DELETE THIS
 	for (int i = 0; i < numEmitters; i++) {
-		Emitter *emit = new Emitter(enemySprites); //THIS IS NOT OKAY: CALLS UPDATE numEmitter TIMES!
+		Emitter *emit = new Emitter(new SpriteSystem());
 		emit->setPosition(ofVec3f(rand() % ofGetWindowWidth(), 0, 0));
 		emit->setVelocity(glm::vec3(0, rand() % 101 + 100, 0));
 		emit->setRate((rand() % 9 + 1) * 0.1);
 		emit->lifespan = 10000;
-		emit->drawable = false;                // make emitter itself invisible
+		//emit->drawable = true;                // make emitter itself invisible
 		emit->setChildImage(enemyProjImage);
+		//emit->setImage(playerImage); Only really necessary if they were stationary
 		emit->setSound(enemySound);
 		emitters.push_back(emit);
 	}
@@ -598,11 +609,14 @@ void ofApp::update(){
 		//
 		//emit1->update();
 		for (int i = 0; i < emitters.size(); i++) {
+			emitters[i]->setPosition(ofVec3f(rand() % ofGetWindowWidth(), 0, 0));
+			emitters[i]->setVelocity(glm::vec3(0, rand() % 101 + 100, 0));
+			emitters[i]->setRate((rand() % 9 + 1) * 0.1);
 			emitters[i]->update();
 		}
 		//CHECK FOR COLLISIONS
 		//
-		checkCollisions();
+		//checkCollisions();
 	}
 }
 
@@ -782,6 +796,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 // Mostly reused from Minigame example... Hahaha
 //
+/*
 void ofApp::checkCollisions() {
 
 	// find the distance at which the two sprites (missles and invaders) will collide
@@ -802,3 +817,4 @@ void ofApp::checkCollisions() {
 		//}
 	}
 }
+*/

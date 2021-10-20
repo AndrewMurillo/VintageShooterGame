@@ -138,9 +138,10 @@ public:
 	bool haveImage;
 	bool started;
 	float width, height;
-	Emitter *child1;
-	Emitter *child2;
-	SpriteSystem *sys; //SHARED SPRITE SYSTEM IS NOT OKAY: UPDATES TWICE
+	vector<Emitter *> emitters;
+	//Emitter *child1;
+	//Emitter *child2;
+	//SpriteSystem *sys; //SHARED SPRITE SYSTEM IS NOT OKAY: UPDATES TWICE
 	//SpriteSystem *sys2;
 
 };
@@ -201,7 +202,7 @@ class ofApp : public ofBaseApp{
 		ofImage enemyProjImage;
 		ofSoundPlayer enemySound;
 		vector<Emitter *> emitters;
-		SpriteSystem *enemySprites;
+		//SpriteSystem *enemySprites; //DELETE THIS
 		int numEmitters;
 		//PathEmitter *emit1;
 		bool enemyProjLoaded;
