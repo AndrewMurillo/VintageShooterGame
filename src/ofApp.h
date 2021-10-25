@@ -32,7 +32,7 @@ public:
 	void update();
 };
 
-
+typedef enum {gameStart, gamePlay, gameEnd} gameState;
 
 class ofApp : public ofBaseApp{
 
@@ -62,6 +62,7 @@ class ofApp : public ofBaseApp{
 		bool isGameInit = false;
 		bool isPaused;
 		int score;
+		gameState state = gameStart;
 
 		// Player object
 		Player player;

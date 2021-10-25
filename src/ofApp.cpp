@@ -210,7 +210,7 @@ void ofApp::update(){
 	//	CHECK IF GAME HAS STARTED
 	//
 	player.setRate(rate);
-	if (isGameInit) {
+	if (state == gamePlay) {
 		//	UPDATE PLAYER
 		//
 		player.update();
@@ -233,7 +233,7 @@ void ofApp::update(){
 void ofApp::draw(){
 	//	CHECK IF GAME HAS STARTED
 	//
-	if (isGameInit) {
+	if (state == gamePlay) {
 		//	DRAW BACKGROUND
 		//
 		ofSetColor(255, 255, 255, 255);
@@ -297,14 +297,14 @@ void ofApp::keyPressed(int key){
 	case ' ':
 		// Don't fire until game started
 		//
-		if (isGameInit) {
+		if (state == gamePlay) {
 			player.isFire = true;
 			//player.start();
 		}
 		// Check if game has not started and start game
 		//
-		if (!isGameInit) {
-			isGameInit = true;
+		if (state != gamePlay) {
+			state = gamePlay;
 			//START ENEMY SPAWNERS
 			//
 			//emit1->start();
@@ -358,7 +358,7 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
-	if (isGameInit) {
+	if (state == gamePlay) {
 		ofPoint mouseCur = ofPoint(x, y);
 		glm::vec3 difference = mouseCur - mouseLast;
 		mouseLast = mouseCur;
