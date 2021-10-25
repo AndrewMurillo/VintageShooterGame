@@ -62,6 +62,46 @@ void Sprite::draw() {
 	ofPopMatrix();
 }
 
+void Sprite::update() {
+	//cout << "Sprite update()" << endl;
+	trans += velocity / ofGetFrameRate();
+}
+
+//-------------------------------------------------------------
+PathSprite::PathSprite() : Sprite() {
+	//cout << "PathSprite made" << endl;
+}
+
+void PathSprite::update() {
+	//cout << "PathSprite update()" << endl;
+	float speed = glm::length(velocity);
+	glm::vec3 p = trans + (getHeading() * speed);
+	trans = curveEval(p.x, scale, cycles);
+	//tri.pos = newPos;
+	// find angle to rotate to new heading; we rotate
+	// from "home" position;  (you could rotate incrementally
+	// from last position as well, but you need to keep previous
+	// heading;
+	//
+	glm::vec3 homeOrient;
+	if (haveImage)
+		homeOrient = glm::vec3(0, -1, 0);  // image needs to be flipped;
+	else
+		homeOrient = glm::vec3(0, 1, 0);
+
+
+	// set rotation (angle between heading and home orientation)
+	//
+	rot = -glm::degrees(glm::orientedAngle(getHeading(), homeOrient, glm::vec3(0, 0, 1)));
+}
+
+glm::vec3 PathSprite::curveEval(float x, float scale, float cycles) {
+	float u = (cycles * x * PI) / ofGetWidth();
+	return glm::vec3(x, -scale * sin(u) + (ofGetHeight() / 2), 0);
+}
+
+//-------------------------------------------------------------
+
 //  Add a Sprite to the Sprite System
 //
 void SpriteSystem::add(Sprite s) {
@@ -76,6 +116,26 @@ void SpriteSystem::remove(int i) {
 	sprites.erase(sprites.begin() + i);
 }
 
+// remove all sprites within a given dist of point, return number removed
+// Reused from Minigame Example...
+//
+int SpriteSystem::removeNear(glm::vec3 point, float dist) {
+	vector<Sprite>::iterator s = sprites.begin();
+	vector<Sprite>::iterator tmp;
+	int count = 0;
+
+	while (s != sprites.end()) {
+		glm::vec3 v = s->trans - point;
+		if (glm::length(v) < dist) {
+			//cout << "player: " << point.x << ", " << point.y << " | emitter: " << s->trans.x << ", " << s->trans.y << endl;
+			tmp = sprites.erase(s);
+			count++;
+			s = tmp;
+		}
+		else s++;
+	}
+	return count;
+}
 
 //  Update the SpriteSystem by checking which sprites have exceeded their
 //  lifespan (and deleting).  Also the sprite is moved to it's next
@@ -92,7 +152,8 @@ void SpriteSystem::update() {
 	// traversing at the same time, use an iterator.
 	//
 	while (s != sprites.end()) {
-		if (s->lifespan != -1 && s->age() > s->lifespan) {
+		// ADDED IF IT IS OFFSCREEN
+		if ((s->lifespan != -1 && s->age() > s->lifespan) || (s->trans.x < -50 || s->trans.y < -50 || s->trans.x > ofGetWindowWidth() + 50 || s->trans.y > ofGetWindowHeight() + 50)) {
 			//			cout << "deleting sprite: " << s->name << endl;
 			tmp = sprites.erase(s);
 			s = tmp;
@@ -103,7 +164,7 @@ void SpriteSystem::update() {
 	//  Move sprite
 	//
 	for (int i = 0; i < sprites.size(); i++) {
-		sprites[i].trans += sprites[i].velocity / ofGetFrameRate();
+		sprites[i].update();
 	}
 }
 
@@ -120,7 +181,6 @@ Emitter::Emitter(SpriteSystem *spriteSys) {
 	sys = spriteSys;
 	lifespan = 3000;    // milliseconds
 	started = false;
-
 	lastSpawned = 0;
 	rate = 1;    // sprites/sec
 	haveChildImage = false;
@@ -164,7 +224,7 @@ void Emitter::update() {
 			// spawn a new sprite
 			Sprite sprite;
 			if (haveChildImage) sprite.setImage(childImage);
-			sprite.velocity = getHeading() * 100;
+			sprite.velocity = getHeading() * glm::length(velocity);
 			sprite.lifespan = lifespan;
 			sprite.setPosition(trans);
 			sprite.birthtime = time;
@@ -180,7 +240,7 @@ void Emitter::update() {
 //
 void Emitter::start() {
 	started = true;
-	lastSpawned = ofGetElapsedTimeMillis();
+	//lastSpawned = ofGetElapsedTimeMillis();
 }
 
 void Emitter::stop() {
@@ -213,7 +273,86 @@ void Emitter::setSound(ofSoundPlayer s) {
 	haveSound = true;
 	sound = s;
 }
+//--------------------------------------------------------------
+//  Create a new Emitter - needs a SpriteSystem
+//
+PathEmitter::PathEmitter(SpriteSystem *spriteSys) : Emitter(spriteSys) {
+	sys = spriteSys;
+}
 
+void PathEmitter::update() {
+	//cout << "PathEmitter update()" << endl;
+	if (started) {
+
+		float time = ofGetElapsedTimeMillis();
+		if ((time - lastSpawned) > (1000.0 / rate)) {
+			// spawn a new sprite
+			PathSprite sprite;
+			if (haveChildImage) sprite.setImage(childImage);
+			sprite.velocity = getHeading() * 100;
+			sprite.lifespan = lifespan;
+			sprite.setPosition(trans);
+			sprite.birthtime = time;
+			sys->add(sprite);
+			lastSpawned = time;
+			if (haveSound) sound.play();
+		}
+	}
+	sys->update();
+}
+/**
+void PathEmitter::draw() {
+	if (drawable) {
+		ofPushMatrix();
+		ofMultMatrix(getTransformMatrix());
+		if (haveImage) {
+			image.draw(-image.getWidth() / 2.0, -image.getHeight() / 2.0);
+		}
+		else {
+			ofSetColor(0, 0, 200);
+			ofDrawRectangle(-width / 2, -height / 2, width, height);
+		}
+		ofPopMatrix();
+	}
+	sys->draw();
+}
+
+void PathEmitter::start() {
+	started = true;
+	//lastSpawned = ofGetElapsedTimeMillis();
+}
+
+void PathEmitter::stop() {
+	started = false;
+}
+
+
+void PathEmitter::setLifespan(float life) {
+	lifespan = life;
+}
+
+void PathEmitter::setSpeed(float s) {
+	speed = s;
+}
+
+void PathEmitter::setChildImage(ofImage img) {
+	childImage = img;
+	haveChildImage = true;
+}
+
+void PathEmitter::setImage(ofImage img) {
+	image = img;
+}
+
+void PathEmitter::setRate(float r) {
+	rate = r;
+}
+
+void PathEmitter::setSound(ofSoundPlayer s) {
+	haveSound = true;
+	sound = s;
+}
+*/
 //--------------------------------------------------------------
 Helicopter::Helicopter() {
 	speed = 0;
@@ -223,8 +362,20 @@ Helicopter::Helicopter() {
 	started = false;
 	width = 60;
 	height = 80;
-	child1 = new Emitter(new SpriteSystem());
-	child2 = new Emitter(new SpriteSystem());
+	emitters.push_back(new Emitter(new SpriteSystem()));
+	emitters.push_back(new Emitter(new SpriteSystem()));
+	//sys = new SpriteSystem();
+	//child1 = new Emitter(sys);
+	//child2 = new Emitter(sys);
+}
+
+void Helicopter::setup(glm::vec3 pos) {
+	setPosition(pos);
+	emitters[0]->setPosition(glm::vec3(pos.x + 20, pos.y, 0));
+	emitters[1]->setPosition(glm::vec3(pos.x - 20, pos.y, 0));
+	for (auto emit : emitters) {
+		emit->setVelocity(glm::vec3(0, 500, 0));
+	}
 }
 
 void Helicopter::draw() {
@@ -242,38 +393,41 @@ void Helicopter::draw() {
 	}
 	ofPopMatrix();
 	//	Call children emitters!
-	child1->draw();
-	child2->draw();
+	for (auto emit : emitters) {
+		emit->draw();
+	}
 }
 
 void Helicopter::update() {
 	//	Rotate offset -> affects where sprites are drawn!
 	glm::vec3 pos1 = glm::vec4(20, 0, 0, 0) * glm::rotate(glm::mat4(1.0), glm::radians(rot), glm::vec3(0, 0, 1));
 	//	Set pos at parent object + offset! (Reminder y is inverted on the screen!)
-	child1->setPosition(glm::vec3(trans.x + pos1.x, trans.y - pos1.y, 0));
-	child2->setPosition(glm::vec3(trans.x - pos1.x, trans.y + pos1.y, 0));
-	//	Set rot to parent rot
-	child1->rot = rot;
-	child2->rot = rot;
-	//	Call children update
-	child1->update();
-	child2->update();
+	emitters[0]->setPosition(glm::vec3(trans.x + pos1.x, trans.y - pos1.y, 0));
+	emitters[1]->setPosition(glm::vec3(trans.x - pos1.x, trans.y + pos1.y, 0));
+	for (auto emit : emitters) {
+		//	Set rot to parent rot
+		emit->rot = rot;
+		//	Call children update
+		emit->update();
+	}
 }
 
 void Helicopter::start() {
 	// Start children emitters
 	if (!started) {
 		started = true;
-		child1->start();
-		child2->start();
+		for (auto emit : emitters) {
+			emit->start();
+		}
 	}
 }
 
 void Helicopter::stop() {
 	// Stop children emitters
 	started = false;
-	child1->stop();
-	child2->stop();
+	for (auto emit : emitters) {
+		emit->stop();
+	}
 }
 
 void Helicopter::setImage(ofImage img) {
@@ -284,12 +438,76 @@ void Helicopter::setImage(ofImage img) {
 }
 
 void Helicopter::setRate(float r) {
-	child1->rate = r;
-	child2->rate = r;
+	for (auto emit : emitters) {
+		emit->rate = r;
+	}
 }
 
+void Helicopter::setProjImage(ofImage img) {
+	for (auto emit : emitters) {
+		emit->setChildImage(img);
+	}
+}
+
+void Helicopter::setProjSound(ofSoundPlayer sound) {
+	for (auto emit : emitters) {
+		emit->setSound(sound);
+	}
+}
+//--------------------------------------------------------------
+void Player::update() {
+	shoot();
+	move();
+	Helicopter::update();
+}
+
+//	Calc movement based on booleans changed by keyboard input
+//
+void Player::move() {
+	int newX = trans.x;
+	if (isLeft) {
+		newX = trans.x - 5;
+		if (newX < 0) {
+			newX = trans.x;
+		}
+	}
+	if (isRight) {
+		newX = trans.x + 5;
+		if (newX > ofGetWindowWidth()) {
+			newX = trans.x;
+		}
+	}
+	int newY = trans.y;
+	if (isUp) {
+		newY = trans.y - 5;
+		if (newY < 0) {
+			newY = trans.y;
+		}
+	}
+	if (isDown) {
+		newY = trans.y + 5;
+		if (newY > ofGetWindowHeight()) {
+			newY = trans.y;
+		}
+	}
+	setPosition(glm::vec3(newX, newY, 0));
+	if (isRotCClockwise) {
+		rot -= 5;
+	}
+	if (isRotClockwise) {
+		rot += 5;
+	}
+}
+
+void Player::shoot() {
+	if (isFire) {
+		start();
+	}
+	//stop();
+}
 //--------------------------------------------------------------
 void ofApp::setup(){
+	ofSetFullscreen(true);
 	//load child image
 	if (playerProjImage.load("images/ball.png")) {
 		playerProjLoaded = true;
@@ -315,24 +533,66 @@ void ofApp::setup(){
 	playerSound.load("sounds/blast.wav");
 	//	PLAYER SETUP
 	//
-	player.setPosition(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
-	player.child1->setPosition(glm::vec3(ofGetWidth() / 2.0 + 20, ofGetHeight() / 2.0, 0));
-	player.child2->setPosition(glm::vec3(ofGetWidth() / 2.0 - 20, ofGetHeight() / 2.0, 0));
+	player.setup(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
 	player.setImage(playerImage);
-	player.child1->setChildImage(playerProjImage);
-	player.child2->setChildImage(playerProjImage);
-	player.child1->setSound(playerSound);
-	player.child2->setSound(playerSound);
+	player.setProjImage(playerProjImage);
+	player.setProjSound(playerSound);
 
+	//	SCORE SETUP
+	//
+	if (!score_font.loadFont("fonts/PressStart2P-Regular.ttf", 12)) {
+		ofLogFatalError("Can't load font.");
+		ofExit();
+	}
+	score = 0;
+
+	//	ENEMY SETUP
+	//
+	if (enemyProjImage.load("images/ball2.png")) {
+		enemyProjLoaded = true;
+	}
+	else {
+		ofLogFatalError("can't load image: images/ball2.png");
+		ofExit();
+	}
+	//load spawn sound
+	enemySound.load("sounds/positiveBeep.ogg");
+	/*
+	emit1 = new PathEmitter(new SpriteSystem());
+	emit1->setChildImage(enemyProjImage);
+	emit1->setPosition(glm::vec3(0, ofGetWindowHeight() / 2.0, 0));
+	emit1->rot -= 90;
+	emit1->drawable = true;
+	emit1->lifespan = 10000;
+	*/
+	numEmitters = 8;
+	// create an array of emitters and set their position;
+	//
+	//enemySprites = new SpriteSystem(); //DELETE THIS
+	for (int i = 0; i < numEmitters; i++) {
+		Emitter *emit = new Emitter(new SpriteSystem());
+		emit->setPosition(ofVec3f(rand() % ofGetWindowWidth(), 0, 0));
+		emit->setVelocity(glm::vec3(0, rand() % 101 + 100, 0));
+		emit->setRate((rand() % 9 + 1) * 0.1);
+		emit->lifespan = 10000;
+		//emit->drawable = true;                // make emitter itself invisible
+		emit->setChildImage(enemyProjImage);
+		//emit->setImage(playerImage); Only really necessary if they were stationary
+		emit->setSound(enemySound);
+		emitters.push_back(emit);
+	}
+	
 	//	GUI SETUP
 	//
 	gui.setup();
 	gui.add(rate.setup("rate", 1, 1, 10));
+	/*
 	gui.add(offset.setup("offset", 20, 1, 500));
 	gui.add(life.setup("life", 5, .1, 10));
 	gui.add(velocity.setup("velocity", glm::vec3(0, 100, 0), glm::vec3(-1000, -1000, -1000), glm::vec3(1000, 1000, 1000)));
 	gui.add(playerSpeed.setup("playerSpeed", 5, 1, 20));
 	gui.add(playerRotate.setup("playerRotate", 2, 1, 45));
+	*/
 	bHide = false;
 }
 
@@ -342,7 +602,21 @@ void ofApp::update(){
 	//
 	player.setRate(rate);
 	if (isGameInit) {
+		//	UPDATE PLAYER
+		//
 		player.update();
+		//	UPDATE ENEMYS
+		//
+		//emit1->update();
+		for (int i = 0; i < emitters.size(); i++) {
+			emitters[i]->setPosition(ofVec3f(rand() % ofGetWindowWidth(), 0, 0));
+			emitters[i]->setVelocity(glm::vec3(0, rand() % 101 + 100, 0));
+			emitters[i]->setRate((rand() % 9 + 1) * 0.1);
+			emitters[i]->update();
+		}
+		//CHECK FOR COLLISIONS
+		//
+		//checkCollisions();
 	}
 }
 
@@ -358,6 +632,15 @@ void ofApp::draw(){
 		//	DRAW PLAYER
 		//
 		player.draw();
+		//	DRAW ENEMIES
+		//
+		//emit1->draw();
+		for (int i = 0; i < emitters.size(); i++) {
+			emitters[i]->draw();
+		}
+		//	DRAW SCORE
+		//
+		score_font.drawString(ofToString(score), 30, 72);
 	}
 	else { //	DRAW START SCREEN
 		ofDrawBitmapString("PRESS SPACE TO START", ofPoint(ofGetWindowWidth() / 2 - 90, ofGetWindowHeight() / 2));
@@ -372,62 +655,56 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 	switch (key) {
 	case OF_KEY_UP:
-		if (isGameInit) {
-			newPos = player.trans - glm::vec3(0, 1, 0) * 5;
-			if (newPos.y >= 0) {
-				player.setPosition(newPos);
-			}
-			//player->setPosition(player->trans + player->getHeading() * 3); //move relative to player heading
-		}
+		player.isUp = true;
+		player.isDown = false;
 		break;
 	case OF_KEY_DOWN:
-		if (isGameInit) {
-			newPos = player.trans + glm::vec3(0, 1, 0) * 5;
-			if (newPos.y <= ofGetHeight()) {
-				player.setPosition(newPos);
-			}
-		}
+		player.isDown = true;
+		player.isUp = false;
 		break;
 	case OF_KEY_RIGHT:
-		if (isGameInit) {
-			newPos = player.trans + glm::vec3(1, 0, 0) * 5;
-			if (newPos.x <= ofGetWidth()) {
-				player.setPosition(newPos);
-			}
-		}
+		player.isRight = true;
+		player.isLeft = false;
 		break;
 	case OF_KEY_LEFT:
-		if (isGameInit) {
-			newPos = player.trans - glm::vec3(1, 0, 0) * 5;
-			if (newPos.x >= 0) {
-				player.setPosition(newPos);
-			}
-		}
+		player.isLeft = true;
+		player.isRight = false;
 		break;
 	case 'a':
-		if (isGameInit) {
-			player.rot -= playerRotate;
-		}
+		player.isRotCClockwise = true;
+		player.isRotClockwise = false;
 		break;
 	case 'd':
-		if (isGameInit) {
-			player.rot += playerRotate;
-		}
+		player.isRotClockwise = true;
+		player.isRotCClockwise = false;
 		break;
 	case 'h':
 		bHide = !bHide;
 		break;
 	case 'f':
-		bFullscreen = !bFullscreen;
-		ofSetFullscreen(bFullscreen);
+		//bFullscreen = !bFullscreen;
+		//ofSetFullscreen(bFullscreen);
 		break;
 	case ' ':
+		// Don't fire until game started
+		//
+		if (isGameInit) {
+			player.isFire = true;
+			//player.start();
+		}
+		// Check if game has not started and start game
+		//
 		if (!isGameInit) {
 			isGameInit = true;
+			//START ENEMY SPAWNERS
+			//
+			//emit1->start();
+			for (int i = 0; i < emitters.size(); i++) {
+				emitters[i]->start();
+			}
 		}
-		player.start();
 		break;
-	case 'p':
+	case 'p': //UNIMPLEMENTED
 		isPaused = !isPaused;
 		break;
 	default:
@@ -438,7 +715,26 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
 	switch (key) {
+	case OF_KEY_UP:
+		player.isUp = false;
+		break;
+	case OF_KEY_DOWN:
+		player.isDown = false;
+		break;
+	case OF_KEY_RIGHT:
+		player.isRight = false;
+		break;
+	case OF_KEY_LEFT:
+		player.isLeft = false;
+		break;
+	case 'a':
+		player.isRotCClockwise = false;
+		break;
+	case 'd':
+		player.isRotClockwise = false;
+		break;
 	case ' ':
+		player.isFire = false;
 		player.stop();
 		break;
 	default:
@@ -497,3 +793,28 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
 }
+
+// Mostly reused from Minigame example... Hahaha
+//
+/*
+void ofApp::checkCollisions() {
+
+	// find the distance at which the two sprites (missles and invaders) will collide
+	// detect a collision when we are within that distance.
+	//
+	float collisionDist = playerProjImage.getHeight() / 2 + enemyProjImage.getHeight() / 2;
+
+	// Loop through all the missiles, then remove any invaders that are within
+	// "collisionDist" of the missiles.  the removeNear() function returns the
+	// number of missiles removed.
+	//
+	for (int i = 0; i < player.sys->sprites.size(); i++) {
+		//THERES AN ISSUE HERE... But at least it runs right?
+		score += enemySprites->removeNear(player.sys->sprites[i].trans, collisionDist);
+		//for (int j = 0; j < numEmitters; j++) {
+		//	cout << emitters[i]->sys->sprites.size() << endl;
+		//	score += emitters[i]->sys->removeNear(player.sys->sprites[i].trans, collisionDist);
+		//}
+	}
+}
+*/
