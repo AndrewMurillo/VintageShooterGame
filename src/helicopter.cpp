@@ -15,6 +15,25 @@ Helicopter::Helicopter() {
 	//child2 = new Emitter(sys);
 }
 
+Helicopter::Helicopter(SpriteSystem * SpriteSys) {
+	speed = 0;
+	velocity = glm::vec3(0, 0, 0);
+	bSelected = false;
+	haveImage = false;
+	started = false;
+	width = 60;
+	height = 80;
+	emitters.push_back(new Emitter(SpriteSys));
+	emitters.push_back(new Emitter(SpriteSys));
+	//sys = new SpriteSystem();
+	//child1 = new Emitter(sys);
+	//child2 = new Emitter(sys);
+}
+
+Helicopter::~Helicopter() {
+	delete sys;
+}
+
 void Helicopter::setup(glm::vec3 pos) {
 	setPosition(pos);
 	emitters[0]->setPosition(glm::vec3(pos.x + 20, pos.y, 0));

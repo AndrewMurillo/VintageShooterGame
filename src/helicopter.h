@@ -8,6 +8,8 @@
 class Helicopter : public BaseObject {
 public:
 	Helicopter();
+	Helicopter(SpriteSystem *);
+	~Helicopter();
 	void setup(glm::vec3);
 	void draw();
 	void update();
@@ -17,6 +19,7 @@ public:
 	void setProjImage(ofImage);
 	void setProjSound(ofSoundPlayer);
 	void setRate(float);
+	SpriteSystem *sys;
 	float speed;
 	float rate;
 	glm::vec3 velocity;

@@ -18,6 +18,11 @@ Emitter::Emitter(SpriteSystem *spriteSys) {
 	height = 50;
 }
 
+Emitter::~Emitter()
+{
+	delete sys;
+}
+
 //  Draw the Emitter if it is drawable. In many cases you would want a hidden emitter
 //
 void Emitter::draw() {
@@ -35,7 +40,7 @@ void Emitter::draw() {
 		}
 		ofPopMatrix();
 	}
-	sys->draw();
+	//sys->draw();
 }
 
 //  Update the Emitter. If it has been started, spawn new sprites with
@@ -58,7 +63,7 @@ void Emitter::update() {
 			if (haveSound) sound.play();
 		}
 	}
-	sys->update();
+	//sys->update();
 }
 
 // Start/Stop the emitter.

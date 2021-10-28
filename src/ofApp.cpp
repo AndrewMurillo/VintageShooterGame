@@ -140,12 +140,16 @@ void ofApp::setup(){
 	}
 	//load turret sound
 	playerSound.load("sounds/blast.wav");
+	//SPRITESYS SETUP
+	//
+	projectiles = new SpriteSystem();
 	//	PLAYER SETUP
 	//
-	player.setup(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
-	player.setImage(playerImage);
-	player.setProjImage(playerProjImage);
-	player.setProjSound(playerSound);
+	player.heli = new Helicopter(projectiles);
+	player.heli->setup(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
+	player.heli->setImage(playerImage);
+	player.heli->setProjImage(playerProjImage);
+	player.heli->setProjSound(playerSound);
 
 	//	SCORE SETUP
 	//
@@ -179,7 +183,7 @@ void ofApp::setup(){
 	//
 	//enemySprites = new SpriteSystem(); //DELETE THIS
 	for (int i = 0; i < numEmitters; i++) {
-		Emitter *emit = new Emitter(new SpriteSystem());
+		Emitter *emit = new Emitter(projectiles);
 		emit->setPosition(ofVec3f(rand() % ofGetWindowWidth(), 0, 0));
 		emit->setVelocity(glm::vec3(0, rand() % 101 + 100, 0));
 		emit->setRate((rand() % 9 + 1) * 0.1);
@@ -209,7 +213,7 @@ void ofApp::setup(){
 void ofApp::update(){
 	//	CHECK IF GAME HAS STARTED
 	//
-	player.setRate(rate);
+	player.heli->setRate(rate);
 	if (state == gamePlay) {
 		//	UPDATE PLAYER
 		//
@@ -223,6 +227,7 @@ void ofApp::update(){
 			emitters[i]->setRate((rand() % 9 + 1) * 0.1);
 			emitters[i]->update();
 		}
+		projectiles->update();
 		//CHECK FOR COLLISIONS
 		//
 		//checkCollisions();
@@ -247,6 +252,7 @@ void ofApp::draw(){
 		for (int i = 0; i < emitters.size(); i++) {
 			emitters[i]->draw();
 		}
+		projectiles->draw();
 		//	DRAW SCORE
 		//
 		score_font.drawString(ofToString(score), 30, 72);
@@ -298,7 +304,8 @@ void ofApp::keyPressed(int key){
 		// Don't fire until game started
 		//
 		if (state == gamePlay) {
-			player.isFire = true;
+			//player.isFire = true;
+			player.heli->start();
 			//player.start();
 		}
 		// Check if game has not started and start game
@@ -343,8 +350,9 @@ void ofApp::keyReleased(int key){
 		player.isRotClockwise = false;
 		break;
 	case ' ':
-		player.isFire = false;
-		player.stop();
+		player.heli->stop();
+		//player.isFire = false;
+		//player.stop();
 		break;
 	default:
 		break;

@@ -63,6 +63,7 @@ class ofApp : public ofBaseApp{
 		bool isPaused;
 		int score;
 		gameState state = gameStart;
+		SpriteSystem *projectiles = NULL;
 
 		// Player object
 		Player player;

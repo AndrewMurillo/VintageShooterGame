@@ -7,6 +7,7 @@
 class Emitter : public BaseObject {
 public:
 	Emitter(SpriteSystem *);
+	~Emitter();
 	void draw();
 	void start();
 	void stop();
