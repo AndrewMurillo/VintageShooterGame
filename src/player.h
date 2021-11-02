@@ -4,7 +4,10 @@
 //	Special gameplay object meant to represent a Player
 //  Based on Helicopter, and has controllable player functionality.
 //
-class Player : public BaseObject {
+
+//typedef enum { MoveStop, MoveLeft, MoveRight, MoveUp, MoveDown } MoveDir;
+
+class Player{
 public:
 	void update();
 	void draw();

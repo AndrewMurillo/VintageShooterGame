@@ -18,32 +18,32 @@ void Player::draw() {
 //
 void Player::move() {
 	int newX = heli->trans.x;
+	int newY = heli->trans.y;
 	if (isLeft) {
 		newX = heli->trans.x - 5;
 		if (newX < 0) {
 			newX = heli->trans.x;
 		}
 	}
-	if (isRight) {
+	else if (isRight) {
 		newX = heli->trans.x + 5;
 		if (newX > ofGetWindowWidth()) {
 			newX = heli->trans.x;
 		}
 	}
-	int newY = heli->trans.y;
-	if (isUp) {
+	else if (isUp) {
 		newY = heli->trans.y - 5;
 		if (newY < 0) {
 			newY = heli->trans.y;
 		}
 	}
-	if (isDown) {
+	else if (isDown) {
 		newY = heli->trans.y + 5;
 		if (newY > ofGetWindowHeight()) {
 			newY = heli->trans.y;
 		}
 	}
-	setPosition(glm::vec3(newX, newY, 0));
+	heli->setPosition(glm::vec3(newX, newY, 0));
 	if (isRotCClockwise) {
 		heli->rot -= 5;
 	}

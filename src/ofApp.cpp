@@ -126,11 +126,11 @@ void ofApp::setup(){
 		ofExit();
 	}
 	//load Player image
-	if (playerImage.load("images/turret.png")) {
+	if (playerImage.load("images/EnemyHeli.png")) {
 		playerImageLoaded = true;
 	}
 	else {
-		ofLogFatalError("can't load image: images/turret.png");
+		ofLogFatalError("can't load image: images/EnemyHeli.png");
 		ofExit();
 	}
 	//load background
@@ -178,7 +178,7 @@ void ofApp::setup(){
 	emit1->drawable = true;
 	emit1->lifespan = 10000;
 	*/
-	numEmitters = 8;
+	numEmitters = 1;
 	// create an array of emitters and set their position;
 	//
 	//enemySprites = new SpriteSystem(); //DELETE THIS
@@ -271,19 +271,19 @@ void ofApp::keyPressed(int key){
 	switch (key) {
 	case OF_KEY_UP:
 		player.isUp = true;
-		player.isDown = false;
+		//player.isDown = false;
 		break;
 	case OF_KEY_DOWN:
 		player.isDown = true;
-		player.isUp = false;
+		//player.isUp = false;
 		break;
 	case OF_KEY_RIGHT:
 		player.isRight = true;
-		player.isLeft = false;
+		//player.isLeft = false;
 		break;
 	case OF_KEY_LEFT:
 		player.isLeft = true;
-		player.isRight = false;
+		//player.isRight = false;
 		break;
 	case 'a':
 		player.isRotCClockwise = true;
@@ -370,9 +370,9 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		ofPoint mouseCur = ofPoint(x, y);
 		glm::vec3 difference = mouseCur - mouseLast;
 		mouseLast = mouseCur;
-		newPos = player.trans + difference;
+		newPos = player.heli->trans + difference;
 		if (!(newPos.x < 0 || newPos.y < 0 || newPos.x > ofGetWidth() || newPos.y > ofGetHeight()))
-			player.setPosition(newPos);
+			player.heli->setPosition(newPos);
 	}
 }
 

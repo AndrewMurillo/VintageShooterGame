@@ -3,6 +3,10 @@
 Helicopter::Helicopter() {
 	speed = 0;
 	velocity = glm::vec3(0, 0, 0);
+	mass = 1;
+	damping = 0.99;
+	force = glm::vec3(0, 0, 0);
+	acceleration = glm::vec3(0, 0, 0);
 	bSelected = false;
 	haveImage = false;
 	started = false;
@@ -10,14 +14,16 @@ Helicopter::Helicopter() {
 	height = 80;
 	emitters.push_back(new Emitter(new SpriteSystem()));
 	emitters.push_back(new Emitter(new SpriteSystem()));
-	//sys = new SpriteSystem();
-	//child1 = new Emitter(sys);
-	//child2 = new Emitter(sys);
+	behavior = doNothing;
 }
 
 Helicopter::Helicopter(SpriteSystem * SpriteSys) {
 	speed = 0;
 	velocity = glm::vec3(0, 0, 0);
+	mass = 1;
+	damping = 0.99;
+	force = glm::vec3(0, 0, 0);
+	acceleration = glm::vec3(0, 0, 0);
 	bSelected = false;
 	haveImage = false;
 	started = false;
@@ -25,6 +31,9 @@ Helicopter::Helicopter(SpriteSystem * SpriteSys) {
 	height = 80;
 	emitters.push_back(new Emitter(SpriteSys));
 	emitters.push_back(new Emitter(SpriteSys));
+	behavior = followPath;
+	glm::vec2 array[] = {glm::vec2(0,0), glm::vec2(ofGetWidth(),ofGetHeight())};
+	path = new Path(array);
 	//sys = new SpriteSystem();
 	//child1 = new Emitter(sys);
 	//child2 = new Emitter(sys);
@@ -50,7 +59,7 @@ void Helicopter::draw() {
 	//	Similar to Sprite.draw()
 	//
 	if (haveImage) {
-		image.draw(-width / 2.0, -height / 2.0);
+		image.draw(-width / 2.0, -height / 2.0 - 12);
 	}
 	else {
 		ofSetColor(255, 0, 0);
@@ -74,6 +83,11 @@ void Helicopter::update() {
 		emit->rot = rot;
 		//	Call children update
 		emit->update();
+	}
+
+	move();
+	if (behavior == followPath) {
+		//move from 1/4 screen to 1/3 screen, wait,  then continue forward
 	}
 }
 
@@ -118,4 +132,20 @@ void Helicopter::setProjSound(ofSoundPlayer sound) {
 	for (auto emit : emitters) {
 		emit->setSound(sound);
 	}
+}
+
+void Helicopter::setBehavior(behaviorType b) {
+	behavior = b;
+}
+
+void Helicopter::move() {
+
+}
+
+void Helicopter::integrate() {
+	trans += velocity * (1.0 / ofGetFrameRate());
+	acceleration = (1 / mass) * force;
+	velocity += acceleration * (1.0 / ofGetFrameRate());
+	velocity *= damping;
+	force = glm::vec3(0, 0, 0);
 }

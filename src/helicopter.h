@@ -1,6 +1,8 @@
 #pragma once
 
 #include "emitter.h"
+#include "path.h"
+typedef enum { followPath, curvePath, doNothing } behaviorType;
 
 //	Special gameplay object meant to represent a Helicopter (SPRITES NOT IMPLEMENTED)
 //thus the strange naming convention. Based on BaseObject, and has 2 emitters "tethered" to it. 
@@ -19,6 +21,11 @@ public:
 	void setProjImage(ofImage);
 	void setProjSound(ofSoundPlayer);
 	void setRate(float);
+	void setBehavior(behaviorType);
+	void move();
+	void integrate();
+	Path *path;
+	behaviorType behavior;
 	SpriteSystem *sys;
 	float speed;
 	float rate;
@@ -28,6 +35,10 @@ public:
 	bool haveImage;
 	bool started;
 	float width, height;
+	float mass;
+	float damping;
+	glm::vec3 force;
+	glm::vec3 acceleration;
 	vector<Emitter *> emitters;
 	//Emitter *child1;
 	//Emitter *child2;
