@@ -199,6 +199,7 @@ void ofApp::setup(){
 	//
 	gui.setup();
 	gui.add(rate.setup("rate", 1, 1, 10));
+	gui.add(thrust.setup("thrust", 100, 100, 1000));
 	/*
 	gui.add(offset.setup("offset", 20, 1, 500));
 	gui.add(life.setup("life", 5, .1, 10));
@@ -214,6 +215,7 @@ void ofApp::update(){
 	//	CHECK IF GAME HAS STARTED
 	//
 	player.heli->setRate(rate);
+	player.thrust = thrust;
 	if (state == gamePlay) {
 		//	UPDATE PLAYER
 		//

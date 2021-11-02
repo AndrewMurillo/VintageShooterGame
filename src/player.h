@@ -15,6 +15,7 @@ public:
 	//void shoot();
 	Helicopter *heli;
 	int lives;
+	float thrust;
 	bool isLeft, isRight, isUp, isDown;
 	bool isRotClockwise, isRotCClockwise;
 	//bool isFire;

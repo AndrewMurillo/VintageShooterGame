@@ -73,6 +73,7 @@ void Helicopter::draw() {
 }
 
 void Helicopter::update() {
+	integrate();
 	//	Rotate offset -> affects where sprites are drawn!
 	glm::vec3 pos1 = glm::vec4(20, 0, 0, 0) * glm::rotate(glm::mat4(1.0), glm::radians(rot), glm::vec3(0, 0, 1));
 	//	Set pos at parent object + offset! (Reminder y is inverted on the screen!)
@@ -143,7 +144,18 @@ void Helicopter::move() {
 }
 
 void Helicopter::integrate() {
-	trans += velocity * (1.0 / ofGetFrameRate());
+	double newX = trans.x + velocity.x * (1.0 / ofGetFrameRate());
+	double newY = trans.y + velocity.y * (1.0 / ofGetFrameRate());
+	if (newX < 0 || newX > ofGetWidth()) {
+		newX = trans.x;
+		velocity.x = 0;
+	}
+	if (newY < 0 || newY > ofGetHeight()) {
+	newY = trans.y;
+	velocity.y = 0;
+	}
+	trans = glm::vec3(newX, newY, 0);
+	//trans += velocity * (1.0 / ofGetFrameRate());
 	acceleration = (1 / mass) * force;
 	velocity += acceleration * (1.0 / ofGetFrameRate());
 	velocity *= damping;

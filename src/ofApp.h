@@ -96,4 +96,5 @@ class ofApp : public ofBaseApp{
 		ofxFloatSlider playerSpeed;
 		ofxFloatSlider playerRotate;
 		ofxIntSlider offset;
+		ofxFloatSlider thrust;
 };
