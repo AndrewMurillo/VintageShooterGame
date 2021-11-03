@@ -6,6 +6,7 @@ void Player::update() {
 	//heli->setPosition(trans);
 	//heli->rot = rot;
 	//heli->scale = scale;
+	heli->integrate();
 	heli->update();
 	//Helicopter::update();
 }

@@ -43,7 +43,6 @@ int SpriteSystem::removeNear(glm::vec3 point, float dist, ofSoundPlayer * sound)
 	while (s != sprites.end()) {
 		glm::vec3 v = s->trans - point;
 		if (glm::length(v) < dist) {
-			//cout << "player: " << point.x << ", " << point.y << " | emitter: " << s->trans.x << ", " << s->trans.y << endl;
 			tmp = sprites.erase(s);
 			sound->play();
 			count++;

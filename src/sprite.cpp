@@ -56,3 +56,4 @@ void Sprite::update() {
 	//cout << "Sprite update()" << endl;
 	trans += velocity / ofGetFrameRate();
 }
+

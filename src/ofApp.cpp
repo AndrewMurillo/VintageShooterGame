@@ -146,6 +146,7 @@ void ofApp::setup(){
 	enemyProj = new SpriteSystem();
 	//	PLAYER SETUP
 	//
+	player.lives = 3;
 	player.heli = new Helicopter(playerProj);
 	player.heli->setup(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
 	player.heli->setImage(playerImage);
@@ -179,7 +180,7 @@ void ofApp::setup(){
 	emit1->drawable = true;
 	emit1->lifespan = 10000;
 	*/
-	numEmitters = 1;
+	numEmitters = 8;
 	// create an array of emitters and set their position;
 	//
 	//enemySprites = new SpriteSystem(); //DELETE THIS
@@ -238,6 +239,8 @@ void ofApp::update(){
 		//CHECK FOR COLLISIONS
 		//
 		checkCollisions();
+		if (player.lives <= 0)
+			state = gameEnd;
 	}
 }
 
@@ -265,8 +268,13 @@ void ofApp::draw(){
 		//
 		score_font.drawString(ofToString(score), 30, 72);
 	}
-	else { //	DRAW START SCREEN
+
+	else if(state == gameStart){ //	DRAW START SCREEN
 		ofDrawBitmapString("PRESS SPACE TO START", ofPoint(ofGetWindowWidth() / 2 - 90, ofGetWindowHeight() / 2));
+	}
+
+	else {
+		score_font.drawString("Final Score: " + ofToString(score), ofGetWindowWidth() / 2 - 90, ofGetWindowHeight() / 2);
 	}
 
 	if (!bHide) {
@@ -327,6 +335,9 @@ void ofApp::keyPressed(int key){
 				emitters[i]->start();
 			}
 		}
+		//if(state == gameEnd)
+			//reset game
+			//game start
 		break;
 	case 'p': //UNIMPLEMENTED
 		isPaused = !isPaused;
@@ -419,8 +430,6 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
-// Mostly reused from Minigame example... Hahaha
-//
 void ofApp::checkCollisions() {
 
 	// find the distance at which the two sprites (missles and invaders) will collide
@@ -432,12 +441,26 @@ void ofApp::checkCollisions() {
 	// "collisionDist" of the missiles.  the removeNear() function returns the
 	// number of missiles removed.
 	//
-	for (int i = 0; i < playerProj->sprites.size(); i++) {
-		//THERES AN ISSUE HERE... But at least it runs right?
-		score += enemyProj->removeNear(playerProj->sprites[i].trans, collisionDist, &enemySound);
-		//for (int j = 0; j < numEmitters; j++) {
-		//	cout << emitters[i]->sys->sprites.size() << endl;
-		//	score += emitters[i]->sys->removeNear(player.sys->sprites[i].trans, collisionDist);
-		//}
+	//for (int i = 0; i < playerProj->sprites.size(); i++) {
+	//	score += enemyProj->removeNear(playerProj->sprites[i].trans, collisionDist, &enemySound);
+	//}
+	vector<Sprite>::iterator s = playerProj->sprites.begin();
+	bool erase = false;
+	while (s != playerProj->sprites.end()) {
+		erase = false;
+		for (int j = 0; j < enemyProj->sprites.size() && s != playerProj->sprites.end(); j++) {
+			glm::vec3 length = enemyProj->sprites[j].trans - s->trans;
+			if (glm::length(length) < collisionDist) {
+				enemyProj->sprites.erase(enemyProj->sprites.begin() + j);
+				s = playerProj->sprites.erase(s);
+				score += 1;
+				enemySound.play();
+				erase = true;
+			}
+		}
+		if (!erase)
+			s++;
 	}
+
+	player.lives -= enemyProj->removeNear(player.heli->trans, collisionDist); //add hurt sound?
 }

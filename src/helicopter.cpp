@@ -77,7 +77,7 @@ void Helicopter::draw() {
 }
 
 void Helicopter::update() {
-	integrate();
+	//integrate();
 	//	Rotate offset -> affects where sprites are drawn!
 	glm::vec3 pos1 = glm::vec4(offset, 0, 0, 0) * glm::rotate(glm::mat4(1.0), glm::radians(rot), glm::vec3(0, 0, 1));
 	//	Set pos at parent object + offset! (Reminder y is inverted on the screen!)
