@@ -63,7 +63,7 @@ class ofApp : public ofBaseApp{
 		bool isPaused;
 		int score;
 		gameState state = gameStart;
-		SpriteSystem *projectiles = NULL;
+		SpriteSystem *playerProj = NULL;
 
 		// Player object
 		Player player;
@@ -78,7 +78,7 @@ class ofApp : public ofBaseApp{
 		ofImage enemyProjImage;
 		ofSoundPlayer enemySound;
 		vector<Emitter *> emitters;
-		//SpriteSystem *enemySprites; //DELETE THIS
+		SpriteSystem *enemyProj = NULL;
 		int numEmitters;
 		//PathEmitter *emit1;
 		bool enemyProjLoaded;
@@ -95,6 +95,7 @@ class ofApp : public ofBaseApp{
 		ofxPanel gui;
 		ofxFloatSlider playerSpeed;
 		ofxFloatSlider playerRotate;
-		ofxIntSlider offset;
+		ofxIntSlider heliOffset;
 		ofxFloatSlider thrust;
+		ofxFloatSlider projSpeed;
 };

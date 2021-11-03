@@ -35,6 +35,25 @@ int SpriteSystem::removeNear(glm::vec3 point, float dist) {
 	return count;
 }
 
+int SpriteSystem::removeNear(glm::vec3 point, float dist, ofSoundPlayer * sound) {
+	vector<Sprite>::iterator s = sprites.begin();
+	vector<Sprite>::iterator tmp;
+	int count = 0;
+
+	while (s != sprites.end()) {
+		glm::vec3 v = s->trans - point;
+		if (glm::length(v) < dist) {
+			//cout << "player: " << point.x << ", " << point.y << " | emitter: " << s->trans.x << ", " << s->trans.y << endl;
+			tmp = sprites.erase(s);
+			sound->play();
+			count++;
+			s = tmp;
+		}
+		else s++;
+	}
+	return count;
+}
+
 //  Update the SpriteSystem by checking which sprites have exceeded their
 //  lifespan (and deleting).  Also the sprite is moved to it's next
 //  location based on velocity and direction.

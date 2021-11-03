@@ -2,6 +2,8 @@
 
 Helicopter::Helicopter() {
 	speed = 0;
+	projSpeed = 500;
+	offset = 20;
 	velocity = glm::vec3(0, 0, 0);
 	mass = 1;
 	damping = 0.99;
@@ -19,6 +21,8 @@ Helicopter::Helicopter() {
 
 Helicopter::Helicopter(SpriteSystem * SpriteSys) {
 	speed = 0;
+	projSpeed = 500;
+	offset = 20;
 	velocity = glm::vec3(0, 0, 0);
 	mass = 1;
 	damping = 0.99;
@@ -75,11 +79,13 @@ void Helicopter::draw() {
 void Helicopter::update() {
 	integrate();
 	//	Rotate offset -> affects where sprites are drawn!
-	glm::vec3 pos1 = glm::vec4(20, 0, 0, 0) * glm::rotate(glm::mat4(1.0), glm::radians(rot), glm::vec3(0, 0, 1));
+	glm::vec3 pos1 = glm::vec4(offset, 0, 0, 0) * glm::rotate(glm::mat4(1.0), glm::radians(rot), glm::vec3(0, 0, 1));
 	//	Set pos at parent object + offset! (Reminder y is inverted on the screen!)
 	emitters[0]->setPosition(glm::vec3(trans.x + pos1.x, trans.y - pos1.y, 0));
 	emitters[1]->setPosition(glm::vec3(trans.x - pos1.x, trans.y + pos1.y, 0));
 	for (auto emit : emitters) {
+		//emit->setVelocity(getHeading() * projSpeed + velocity);
+		emit->setVelocity(getHeading() * projSpeed);
 		//	Set rot to parent rot
 		emit->rot = rot;
 		//	Call children update

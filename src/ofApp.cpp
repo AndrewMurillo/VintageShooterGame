@@ -142,10 +142,11 @@ void ofApp::setup(){
 	playerSound.load("sounds/blast.wav");
 	//SPRITESYS SETUP
 	//
-	projectiles = new SpriteSystem();
+	playerProj = new SpriteSystem();
+	enemyProj = new SpriteSystem();
 	//	PLAYER SETUP
 	//
-	player.heli = new Helicopter(projectiles);
+	player.heli = new Helicopter(playerProj);
 	player.heli->setup(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
 	player.heli->setImage(playerImage);
 	player.heli->setProjImage(playerProjImage);
@@ -183,7 +184,7 @@ void ofApp::setup(){
 	//
 	//enemySprites = new SpriteSystem(); //DELETE THIS
 	for (int i = 0; i < numEmitters; i++) {
-		Emitter *emit = new Emitter(projectiles);
+		Emitter *emit = new Emitter(enemyProj);
 		emit->setPosition(ofVec3f(rand() % ofGetWindowWidth(), 0, 0));
 		emit->setVelocity(glm::vec3(0, rand() % 101 + 100, 0));
 		emit->setRate((rand() % 9 + 1) * 0.1);
@@ -191,17 +192,18 @@ void ofApp::setup(){
 		//emit->drawable = true;                // make emitter itself invisible
 		emit->setChildImage(enemyProjImage);
 		//emit->setImage(playerImage); Only really necessary if they were stationary
-		emit->setSound(enemySound);
+		//emit->setSound(enemySound);
 		emitters.push_back(emit);
 	}
 	
 	//	GUI SETUP
 	//
 	gui.setup();
-	gui.add(rate.setup("rate", 1, 1, 10));
-	gui.add(thrust.setup("thrust", 100, 100, 1000));
+	gui.add(rate.setup("rate", 3, 1, 10));
+	gui.add(thrust.setup("thrust", 700, 100, 1000));
+	gui.add(projSpeed.setup("projSpeed", 1000, 500, 2000));
+	gui.add(heliOffset.setup("offset", 20, 0, 50));
 	/*
-	gui.add(offset.setup("offset", 20, 1, 500));
 	gui.add(life.setup("life", 5, .1, 10));
 	gui.add(velocity.setup("velocity", glm::vec3(0, 100, 0), glm::vec3(-1000, -1000, -1000), glm::vec3(1000, 1000, 1000)));
 	gui.add(playerSpeed.setup("playerSpeed", 5, 1, 20));
@@ -216,6 +218,8 @@ void ofApp::update(){
 	//
 	player.heli->setRate(rate);
 	player.thrust = thrust;
+	player.heli->projSpeed = projSpeed;
+	player.heli->offset = heliOffset;
 	if (state == gamePlay) {
 		//	UPDATE PLAYER
 		//
@@ -229,10 +233,11 @@ void ofApp::update(){
 			emitters[i]->setRate((rand() % 9 + 1) * 0.1);
 			emitters[i]->update();
 		}
-		projectiles->update();
+		playerProj->update();
+		enemyProj->update();
 		//CHECK FOR COLLISIONS
 		//
-		//checkCollisions();
+		checkCollisions();
 	}
 }
 
@@ -254,7 +259,8 @@ void ofApp::draw(){
 		for (int i = 0; i < emitters.size(); i++) {
 			emitters[i]->draw();
 		}
-		projectiles->draw();
+		playerProj->draw();
+		enemyProj->draw();
 		//	DRAW SCORE
 		//
 		score_font.drawString(ofToString(score), 30, 72);
@@ -415,7 +421,6 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 // Mostly reused from Minigame example... Hahaha
 //
-/*
 void ofApp::checkCollisions() {
 
 	// find the distance at which the two sprites (missles and invaders) will collide
@@ -427,13 +432,12 @@ void ofApp::checkCollisions() {
 	// "collisionDist" of the missiles.  the removeNear() function returns the
 	// number of missiles removed.
 	//
-	for (int i = 0; i < player.sys->sprites.size(); i++) {
+	for (int i = 0; i < playerProj->sprites.size(); i++) {
 		//THERES AN ISSUE HERE... But at least it runs right?
-		score += enemySprites->removeNear(player.sys->sprites[i].trans, collisionDist);
+		score += enemyProj->removeNear(playerProj->sprites[i].trans, collisionDist, &enemySound);
 		//for (int j = 0; j < numEmitters; j++) {
 		//	cout << emitters[i]->sys->sprites.size() << endl;
 		//	score += emitters[i]->sys->removeNear(player.sys->sprites[i].trans, collisionDist);
 		//}
 	}
 }
-*/

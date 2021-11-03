@@ -10,6 +10,7 @@ public:
 	void add(Sprite);
 	void remove(int);
 	int removeNear(glm::vec3 point, float dist);
+	int removeNear(glm::vec3 point, float dist, ofSoundPlayer * sound);
 	void update();
 	void draw();
 	vector<Sprite> sprites;

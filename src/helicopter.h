@@ -30,6 +30,8 @@ public:
 	float speed;
 	float rate;
 	glm::vec3 velocity;
+	float projSpeed;
+	int offset;
 	ofImage image;
 	string name;
 	bool haveImage;
