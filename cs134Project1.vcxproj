@@ -182,6 +182,7 @@
   <ItemGroup>
     <ClCompile Include="src\baseObject.cpp" />
     <ClCompile Include="src\emitter.cpp" />
+    <ClCompile Include="src\explosion.cpp" />
     <ClCompile Include="src\helicopter.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
@@ -195,6 +196,8 @@
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxSlider.cpp" />
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxSliderGroup.cpp" />
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxToggle.cpp" />
+    <ClCompile Include="src\particle.cpp" />
+    <ClCompile Include="src\particleSystem.cpp" />
     <ClCompile Include="src\path.cpp" />
     <ClCompile Include="src\player.cpp" />
     <ClCompile Include="src\sprite.cpp" />
@@ -203,6 +206,7 @@
   <ItemGroup>
     <ClInclude Include="src\baseObject.h" />
     <ClInclude Include="src\emitter.h" />
+    <ClInclude Include="src\explosion.h" />
     <ClInclude Include="src\helicopter.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxBaseGui.h" />
@@ -217,6 +221,8 @@
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxSlider.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxSliderGroup.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxToggle.h" />
+    <ClInclude Include="src\particle.h" />
+    <ClInclude Include="src\particleSystem.h" />
     <ClInclude Include="src\path.h" />
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\sprite.h" />

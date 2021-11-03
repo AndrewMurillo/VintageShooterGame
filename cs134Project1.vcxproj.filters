@@ -58,6 +58,15 @@
     <ClCompile Include="src\path.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\explosion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\particle.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\particleSystem.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -132,6 +141,15 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\path.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\explosion.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\particle.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\particleSystem.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

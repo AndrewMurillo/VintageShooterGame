@@ -196,7 +196,15 @@ void ofApp::setup(){
 		//emit->setSound(enemySound);
 		emitters.push_back(emit);
 	}
-	
+	//tForce = new TurbulenceForce(glm::vec3(minT->x, minT->y, minT->y), glm::vec3(maxT->x, maxT->y, maxT->y));
+	expForce = new ImpulseRingForce(expMagnitude);
+	e = new Explosion();
+	e->setLifespan(2);
+	e->setGroupSize(100);
+	e->sys->addForce(expForce);
+	e->setVelocity(glm::vec3(0, 0, 0));
+	e->setOneShot(true);
+
 	//	GUI SETUP
 	//
 	gui.setup();
@@ -204,6 +212,9 @@ void ofApp::setup(){
 	gui.add(thrust.setup("thrust", 700, 100, 1000));
 	gui.add(projSpeed.setup("projSpeed", 1000, 500, 2000));
 	gui.add(heliOffset.setup("offset", 20, 0, 50));
+	gui.add(expMagnitude.setup("explosion magnitude", 500, 1, 1000));
+	//gui.add(minT.setup("Min Turb", glm::vec3(-20, -20, 0), glm::vec3(-50, -50, 0), glm::vec3(0, 0, 0)));
+	//gui.add(maxT.setup("Max Turb", glm::vec3(20, 20, 0), glm::vec3(50, 50, 0), glm::vec3(0, 0, 0)));
 	/*
 	gui.add(life.setup("life", 5, .1, 10));
 	gui.add(velocity.setup("velocity", glm::vec3(0, 100, 0), glm::vec3(-1000, -1000, -1000), glm::vec3(1000, 1000, 1000)));
@@ -221,6 +232,8 @@ void ofApp::update(){
 	player.thrust = thrust;
 	player.heli->projSpeed = projSpeed;
 	player.heli->offset = heliOffset;
+	expForce->setMagnitude(expMagnitude);
+	//tForce->setMagnitude(glm::vec3(minT->x, minT->y, minT->y), glm::vec3(maxT->x, maxT->y, maxT->y));
 	if (state == gamePlay) {
 		//	UPDATE PLAYER
 		//
@@ -234,6 +247,10 @@ void ofApp::update(){
 			emitters[i]->setRate((rand() % 9 + 1) * 0.1);
 			emitters[i]->update();
 		}
+		//for (int i = 0; i < explosions.size(); i++) {
+		//	explosions[i]->update();
+		//}
+		e->update();
 		playerProj->update();
 		enemyProj->update();
 		//CHECK FOR COLLISIONS
@@ -262,6 +279,10 @@ void ofApp::draw(){
 		for (int i = 0; i < emitters.size(); i++) {
 			emitters[i]->draw();
 		}
+		//for (int i = 0; i < explosions.size(); i++) {
+		//	explosions[i]->draw();
+		//}
+		e->draw();
 		playerProj->draw();
 		enemyProj->draw();
 		//	DRAW SCORE
@@ -452,9 +473,14 @@ void ofApp::checkCollisions() {
 			glm::vec3 length = enemyProj->sprites[j].trans - s->trans;
 			if (glm::length(length) < collisionDist) {
 				enemyProj->sprites.erase(enemyProj->sprites.begin() + j);
+				
+				e->setPosition(s->trans);
 				s = playerProj->sprites.erase(s);
 				score += 1;
 				enemySound.play();
+				//trigger explosion
+				e->sys->reset();
+				e->start();
 				erase = true;
 			}
 		}

@@ -8,7 +8,9 @@
 #include "emitter.h"
 #include "helicopter.h"
 #include "player.h"
-
+#include "particle.h"
+#include "particleSystem.h"
+#include "explosion.h"
 
 
 //  Attempt at creating a PathSprite class, which would use a calculated motion path rather
@@ -63,15 +65,20 @@ class ofApp : public ofBaseApp{
 		bool isPaused;
 		int score;
 		gameState state = gameStart;
-		SpriteSystem *playerProj = NULL;
+		ImpulseRingForce *expForce;
+		//TurbulenceForce *tForce;
+		Explosion *e = NULL;
+		//vector<Explosion *> explosions;
+		//ExplosionSystem explosions;
 
-		// Player object
+		// Player
 		Player player;
 		ofImage playerProjImage;
 		ofImage playerImage;
 		ofSoundPlayer playerSound;
 		bool playerImageLoaded;
 		bool playerProjLoaded;
+		SpriteSystem *playerProj = NULL;
 		
 		// Enemy Emitters
 		//
@@ -98,4 +105,7 @@ class ofApp : public ofBaseApp{
 		ofxIntSlider heliOffset;
 		ofxFloatSlider thrust;
 		ofxFloatSlider projSpeed;
+		ofxFloatSlider expMagnitude;
+		//ofxVec3Slider minT;
+		//ofxVec3Slider maxT;
 };
