@@ -35,7 +35,7 @@ Helicopter::Helicopter(SpriteSystem * SpriteSys) {
 	height = 80;
 	emitters.push_back(new Emitter(SpriteSys));
 	emitters.push_back(new Emitter(SpriteSys));
-	behavior = followPath;
+	behavior = doNothing;
 	glm::vec2 array[] = {glm::vec2(0,0), glm::vec2(ofGetWidth(),ofGetHeight())};
 	path = new Path(array);
 	//sys = new SpriteSystem();
@@ -93,9 +93,6 @@ void Helicopter::update() {
 	}
 
 	move();
-	if (behavior == followPath) {
-		//move from 1/4 screen to 1/3 screen, wait,  then continue forward
-	}
 }
 
 void Helicopter::start() {
@@ -146,6 +143,32 @@ void Helicopter::setBehavior(behaviorType b) {
 }
 
 void Helicopter::move() {
+	if (behavior == doNothing)
+		return;
+	if (behavior == followPath) {
+		float cycles = 4;
+		float scale = 200;
+		//cout << "PathSprite update()" << endl;
+		float speed = glm::length(velocity);
+		glm::vec3 p = trans + (getHeading() * speed);
+		float u = (cycles * p.x * PI) / ofGetWidth();
+		trans = glm::vec3(p.x, -scale * sin(u) + (ofGetHeight() / 2), 0);
+		// find angle to rotate to new heading; we rotate
+		// from "home" position;  (you could rotate incrementally
+		// from last position as well, but you need to keep previous
+		// heading;
+		//
+		glm::vec3 homeOrient;
+		if (haveImage)
+			homeOrient = glm::vec3(0, -1, 0);  // image needs to be flipped;
+		else
+			homeOrient = glm::vec3(0, 1, 0);
+
+
+		// set rotation (angle between heading and home orientation)
+		//
+		rot = -glm::degrees(glm::orientedAngle(getHeading(), homeOrient, glm::vec3(0, 0, 1)));
+	}
 
 }
 

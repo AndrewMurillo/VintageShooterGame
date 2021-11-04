@@ -14,6 +14,10 @@ void SpriteSystem::remove(int i) {
 	sprites.erase(sprites.begin() + i);
 }
 
+void SpriteSystem::reset() {
+	sprites.clear();
+}
+
 // remove all sprites within a given dist of point, return number removed
 // Reused from Minigame Example...
 //

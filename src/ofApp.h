@@ -55,6 +55,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		void checkCollisions();
+		void resetGame();
 
 		// Application data
 		ofImage background;
@@ -76,6 +77,7 @@ class ofApp : public ofBaseApp{
 		ofImage playerProjImage;
 		ofImage playerImage;
 		ofSoundPlayer playerSound;
+		ofSoundPlayer playerHurtSound;
 		bool playerImageLoaded;
 		bool playerProjLoaded;
 		SpriteSystem *playerProj = NULL;
@@ -89,6 +91,7 @@ class ofApp : public ofBaseApp{
 		int numEmitters;
 		//PathEmitter *emit1;
 		bool enemyProjLoaded;
+		vector<Helicopter *> enemyHelos;
 
 		// UI
 		bool bFullscreen = false;
@@ -96,7 +99,6 @@ class ofApp : public ofBaseApp{
 		// GUI
 		bool bHide;
 		ofxFloatSlider rate;
-		ofxFloatSlider life;
 		ofxVec3Slider velocity;
 		ofxLabel screenSize;
 		ofxPanel gui;

@@ -57,6 +57,7 @@ void Emitter::update() {
 			sprite.velocity = getHeading() * glm::length(velocity);
 			sprite.lifespan = lifespan;
 			sprite.setPosition(trans);
+			sprite.rot = rot;
 			sprite.birthtime = time;
 			sys->add(sprite);
 			lastSpawned = time;

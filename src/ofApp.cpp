@@ -118,7 +118,7 @@ void PathEmitter::setSound(ofSoundPlayer s) {
 void ofApp::setup(){
 	ofSetFullscreen(true);
 	//load child image
-	if (playerProjImage.load("images/ball.png")) {
+	if (playerProjImage.load("images/missle.png")) {
 		playerProjLoaded = true;
 	}
 	else {
@@ -140,6 +140,7 @@ void ofApp::setup(){
 	}
 	//load turret sound
 	playerSound.load("sounds/blast.wav");
+	playerHurtSound.load("sounds/retroHurt.mp3");
 	//SPRITESYS SETUP
 	//
 	playerProj = new SpriteSystem();
@@ -163,14 +164,14 @@ void ofApp::setup(){
 
 	//	ENEMY SETUP
 	//
-	if (enemyProjImage.load("images/ball2.png")) {
+	if (enemyProjImage.load("images/missle2.png")) {
 		enemyProjLoaded = true;
 	}
 	else {
-		ofLogFatalError("can't load image: images/ball2.png");
+		ofLogFatalError("can't load image: images/missle2.png");
 		ofExit();
 	}
-	//load spawn sound
+	//load enemy death sound
 	enemySound.load("sounds/positiveBeep.ogg");
 	/*
 	emit1 = new PathEmitter(new SpriteSystem());
@@ -216,7 +217,6 @@ void ofApp::setup(){
 	//gui.add(minT.setup("Min Turb", glm::vec3(-20, -20, 0), glm::vec3(-50, -50, 0), glm::vec3(0, 0, 0)));
 	//gui.add(maxT.setup("Max Turb", glm::vec3(20, 20, 0), glm::vec3(50, 50, 0), glm::vec3(0, 0, 0)));
 	/*
-	gui.add(life.setup("life", 5, .1, 10));
 	gui.add(velocity.setup("velocity", glm::vec3(0, 100, 0), glm::vec3(-1000, -1000, -1000), glm::vec3(1000, 1000, 1000)));
 	gui.add(playerSpeed.setup("playerSpeed", 5, 1, 20));
 	gui.add(playerRotate.setup("playerRotate", 2, 1, 45));
@@ -247,9 +247,8 @@ void ofApp::update(){
 			emitters[i]->setRate((rand() % 9 + 1) * 0.1);
 			emitters[i]->update();
 		}
-		//for (int i = 0; i < explosions.size(); i++) {
-		//	explosions[i]->update();
-		//}
+		//	UPDATE EXPLOSIONS
+		//
 		e->update();
 		playerProj->update();
 		enemyProj->update();
@@ -258,6 +257,7 @@ void ofApp::update(){
 		checkCollisions();
 		if (player.lives <= 0)
 			state = gameEnd;
+
 	}
 }
 
@@ -287,7 +287,9 @@ void ofApp::draw(){
 		enemyProj->draw();
 		//	DRAW SCORE
 		//
-		score_font.drawString(ofToString(score), 30, 72);
+		score_font.drawString("SCORE: " + ofToString(score), 30, 72);
+		//  DRAW LIVES
+		score_font.drawString("HEALTH: " + ofToString(player.lives), ofGetWindowWidth() - 200, 72);
 	}
 
 	else if(state == gameStart){ //	DRAW START SCREEN
@@ -349,16 +351,8 @@ void ofApp::keyPressed(int key){
 		//
 		if (state != gamePlay) {
 			state = gamePlay;
-			//START ENEMY SPAWNERS
-			//
-			//emit1->start();
-			for (int i = 0; i < emitters.size(); i++) {
-				emitters[i]->start();
-			}
+			resetGame();
 		}
-		//if(state == gameEnd)
-			//reset game
-			//game start
 		break;
 	case 'p': //UNIMPLEMENTED
 		isPaused = !isPaused;
@@ -473,7 +467,6 @@ void ofApp::checkCollisions() {
 			glm::vec3 length = enemyProj->sprites[j].trans - s->trans;
 			if (glm::length(length) < collisionDist) {
 				enemyProj->sprites.erase(enemyProj->sprites.begin() + j);
-				
 				e->setPosition(s->trans);
 				s = playerProj->sprites.erase(s);
 				score += 1;
@@ -488,5 +481,30 @@ void ofApp::checkCollisions() {
 			s++;
 	}
 
-	player.lives -= enemyProj->removeNear(player.heli->trans, collisionDist); //add hurt sound?
+	//player.lives -= enemyProj->removeNear(player.heli->trans, collisionDist); //add hurt sound?
+	for (int i = 0; i < enemyProj->sprites.size(); i++) {
+		if ( glm::length(enemyProj->sprites[i].trans - player.heli->trans)< collisionDist) {
+			enemyProj->sprites.erase(enemyProj->sprites.begin() + i);
+			player.lives--;
+			playerHurtSound.play();
+		}
+	}
+}
+
+void ofApp::resetGame() {
+	playerProj->reset();
+	for (int i = 0; i < emitters.size(); i++) {
+		emitters[i]->stop();
+	}
+	enemyProj->reset();
+	player.lives = 3;
+	player.heli->rot = 0;
+	player.heli->velocity = glm::vec3(0, 0, 0);
+	player.heli->setup(glm::vec3(ofGetWidth() / 2.0, ofGetHeight() / 2.0, 0));
+	score = 0;
+	//START ENEMY SPAWNERS
+	//
+	for (int i = 0; i < emitters.size(); i++) {
+		emitters[i]->start();
+	}
 }
