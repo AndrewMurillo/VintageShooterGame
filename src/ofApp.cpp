@@ -221,7 +221,7 @@ void ofApp::setup(){
 	gui.add(playerSpeed.setup("playerSpeed", 5, 1, 20));
 	gui.add(playerRotate.setup("playerRotate", 2, 1, 45));
 	*/
-	bHide = false;
+	bHide = true;
 }
 
 //--------------------------------------------------------------
