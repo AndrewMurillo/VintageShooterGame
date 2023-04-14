@@ -43,9 +43,6 @@
     <ClCompile Include="src\sprite.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\helicopter.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\player.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -67,6 +64,10 @@
     <ClCompile Include="src\particleSystem.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\attackHeli.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\helicopter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -131,9 +132,6 @@
     <ClInclude Include="src\sprite.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\helicopter.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="src\player.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -152,6 +150,12 @@
     <ClInclude Include="src\particleSystem.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\attackHeli.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helicopter.h" />
+    <ClInclude Include="src\vehicle.h" />
+    <ClInclude Include="src\physics.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />

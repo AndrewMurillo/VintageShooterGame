@@ -5,20 +5,25 @@
 
 //  General Sprite class  (similar to a Particle)
 //
-class Sprite : public BaseObject {
+class Sprite{
 public:
 	Sprite();
-	virtual ~Sprite() = default; //Ignore this
+	Sprite(ofImage *);
 	void draw();
-	virtual void update();
+	void update();
+	void setImage(ofImage *);
 	float age();
-	void setImage(ofImage);
+	BaseObject * transform;
 	float speed;    //   in pixels/sec
 	glm::vec3 velocity; // in pixels/sec
-	ofImage image;
+	ofImage *image;
 	float birthtime; // elapsed time in ms
 	float lifespan;  //  time in ms
 	string name;
 	bool haveImage;
 	float width, height;
+	float mass;
+	float damping;
+	glm::vec3 force;
+	glm::vec3 acceleration;
 };
